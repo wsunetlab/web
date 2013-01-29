@@ -1,0 +1,221 @@
+K 25
+svn:wc:ra_dav:version-url
+V 41
+/repos/motelab/!svn/ver/204/trunk/web/bin
+END
+msp430-gcc
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-gcc
+END
+uisp
+K 25
+svn:wc:ra_dav:version-url
+V 45
+/repos/motelab/!svn/ver/11/trunk/web/bin/uisp
+END
+msp430-ld
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-ld
+END
+msp430-objdump
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-objdump
+END
+msp430-strip
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-strip
+END
+set-mote-id
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/repos/motelab/!svn/ver/11/trunk/web/bin/set-mote-id
+END
+msp430-objcopy
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-objcopy
+END
+nescc
+K 25
+svn:wc:ra_dav:version-url
+V 46
+/repos/motelab/!svn/ver/11/trunk/web/bin/nescc
+END
+msp430-ranlib
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-ranlib
+END
+msp430-size
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-size
+END
+msp430-nm
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-nm
+END
+nescc-diff
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/repos/motelab/!svn/ver/11/trunk/web/bin/nescc-diff
+END
+ncc
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/repos/motelab/!svn/ver/11/trunk/web/bin/ncc
+END
+msp430-bsl
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-bsl
+END
+ncg
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/repos/motelab/!svn/ver/11/trunk/web/bin/ncg
+END
+mig
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/repos/motelab/!svn/ver/11/trunk/web/bin/mig
+END
+collectsf
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/repos/motelab/!svn/ver/204/trunk/web/bin/collectsf
+END
+msp430-gcov
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-gcov
+END
+tos-set-symbols
+K 25
+svn:wc:ra_dav:version-url
+V 56
+/repos/motelab/!svn/ver/11/trunk/web/bin/tos-set-symbols
+END
+msp430-readelf
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-readelf
+END
+msp430-ar
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-ar
+END
+msp430-as
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-as
+END
+netbsl
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/repos/motelab/!svn/ver/190/trunk/web/bin/netbsl
+END
+grabPower
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/repos/motelab/!svn/ver/11/trunk/web/bin/grabPower
+END
+msp430-addr2line
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-addr2line
+END
+changebaudrate
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/repos/motelab/!svn/ver/11/trunk/web/bin/changebaudrate
+END
+elf.py
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/repos/motelab/!svn/ver/11/trunk/web/bin/elf.py
+END
+nescc-ncg
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/repos/motelab/!svn/ver/11/trunk/web/bin/nescc-ncg
+END
+nescc-mig
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/repos/motelab/!svn/ver/11/trunk/web/bin/nescc-mig
+END
+jcf-dump
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/repos/motelab/!svn/ver/59/trunk/web/bin/jcf-dump
+END
+msp430-cpp
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-cpp
+END
+nesdoc
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/repos/motelab/!svn/ver/11/trunk/web/bin/nesdoc
+END
+msp430-c++filt
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-c++filt
+END
+msp430-strings
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-strings
+END
+ml-program
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/repos/motelab/!svn/ver/190/trunk/web/bin/ml-program
+END
+msp430-gccbug
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/repos/motelab/!svn/ver/11/trunk/web/bin/msp430-gccbug
+END

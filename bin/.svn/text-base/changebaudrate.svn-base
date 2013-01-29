@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+use strict;
+use Sys::Syslog;
+
+sub kill_nc_processes {
+  my $host = shift;
+  my $port = shift;
+  open(PROCESSES, "ps aux | grep nc | grep $host | grep $port | awk '{ print \$2}' 2>&1 |") or die "Fuck\n";
+  while (my $process = <PROCESSES>) {
+    chomp($process);
+    kill 9, $process;
+  }
+  close(PROCESSES);
+}
+
+if (@ARGV < 1) {
+    print<<USAGE;
+usage changebaudrate [host:port]
+USAGE
+exit 0;
+}
+my $HOSTPORT = shift @ARGV;
+$HOSTPORT =~ /([0-9\.]+)\:(\d+)/;
+my $HOST = $1;
+my $PORT = $2;
+openlog($0, '', 'user');
+syslog('info',"changing baud rate: $HOST on port $PORT");
+
+my $FILE = shift @ARGV;
+my $COMMAND = qq{echo "baudrate 57600" | /usr/bin/nc $HOST $PORT};
+
+my $CHILDPID = open(COMMANDOUTPUT, "$COMMAND 2>&1 |") or die "Shit\n";
+
+my $linesRead = 0;
+my $newLine = "";
+while (1) {
+    eval {
+	local $SIG{ALRM} = sub { die "ALARM\n" };
+	alarm 3;
+
+	if ($newLine = <COMMANDOUTPUT>) {
+      
+	    # 15 Mar 2006 : GWA : Could put other checks here.
+	    alarm 0;
+	    $linesRead++;
+	    syslog('info', "$HOST:$PORT $newLine");
+	    print $newLine;
+
+	    if (($newLine =~ /User set/)) {
+        
+        close(COMMANDOUTPUT);
+        exit(0);
+		
+	    }
+    } else {
+      if ($linesRead == 0) {
+        die "EOF\n";
+      } else {
+        alarm 0;
+        last;
+      }
+    }
+  };
+
+  if ($@) {
+    syslog('info',"$HOST:$PORT Timeout");
+    print STDERR "Timeout\n";
+    closelog();
+    &kill_nc_processes($HOST, $PORT);
+    exit(2);
+  }
+}
+closelog();
+close(COMMANDOUTPUT);
+exit(0);

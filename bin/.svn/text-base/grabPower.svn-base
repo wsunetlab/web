@@ -1,0 +1,166 @@
+#!/usr/bin/perl
+
+# 09 Feb 2004 : GWA : Preliminary script to grab power readings from the
+#               Keithley 2701 Digital Multimeter.  The general format was
+#               adapted from the (fairly poor) Linux example posted on the
+#               Keithley website.
+#
+# 20 Apr 2004 : GWA : I'm checking this into the tree on the (off) chance
+#               that it is useful to anyone else.
+
+use Socket;
+
+# 09 Feb 2004 : GWA : Since this script gets set up as a daemon during job
+#               execution we want to make sure that we shutdown correctly.
+#               The Keithley seems to have a defect where it eventually
+#               starts to refuse connections if the socket is not closed, so
+#               this is doubly important.
+
+$SIG{INT} = \&handleKill;
+$SIG{KILL} = \&handleKill;
+$SIG{TERM} = \&handleKill;
+
+# 09 Feb 2004 : GWA : Set up connection.
+
+my $ipAddr = shift;
+my $speed = shift;
+my $wait = shift;
+if (!defined($wait)) {
+  $wait = 60;
+}
+my $numpoints = $wait * 3750;
+$wait += 10;
+
+my $protoName = getprotobyname('tcp');
+my $fullAddr = sockaddr_in(1394, inet_aton($ipAddr));
+my $BLANK = "\r\n";
+my $last = 0;
+my $buffer;
+my $buffer2;
+my $readSecond = 0;
+
+# 09 Feb 2004 : GWA : Headings for output file.  The job-daemon also outputs
+#               a similar line that lists the job name and start time.
+
+print "# Column format\n";
+print "# <timestamp> <current reading> <sample number>\n";
+
+socket(SOCK, AF_INET, SOCK_STREAM, $protoName) or die 'Socket';
+connect(SOCK, $fullAddr) or die 'Connect';
+
+# 09 Feb 2004 : GWA : 'fast' speed option not supported yet.
+
+if ($speed eq 'fast') {
+  fullPrint("SYST:BEEP OFF");
+  fullPrint("FORM:ELEM READ,TST,RNUM");
+  fullPrint("FUNC 'CURR'");
+  fullPrint("SENSE:CURR:DC:NPLC 0.002");
+  fullPrint("SENSE:CURR:DC:RANGE 0.1");
+  fullPrint("SENSE:CURR:DC:AVERAGE:STATE:OFF");
+  fullPrint("TRIGGER:DELAY 0");
+  fullPrint("SYSTEM:AZERO:STATE OFF");
+  fullPrint("DISP:ENAB OFF");
+  fullPrint("TRIGGER:COUNT 1");
+  fullPrint("SAMPLE:COUNT $numpoints");
+  fullPrint("TRAC:CLE");
+  fullPrint("INIT");
+} elsif ($speed eq 'slow') {
+  
+  # 09 Feb 2004 : GWA : Start programming device for 'slow' speed.  This is
+  #               the only speed with which we are able to grab continuous
+  #               readings, but because of the overhead associated with the
+  #               Keithley trace buffer the upper bound on reading speed
+  #               seems to be about 350 Hz.  Right now we get about 250 Hz,
+  #               since I'm not sure exactly where the delay is and I don't
+  #               want to get funny data until I know exactly which component
+  #               sets the ceiling.
+  
+  # 09 Feb 2004 : GWA : Descriptions of these commands can be found in the
+  #               Keithley manual.
+
+  fullPrint("SYST:BEEP OFF");
+  fullPrint("FORM:ELEM READ,TST,RNUM");
+  fullPrint("FUNC 'CURR'");
+  fullPrint("CURR:APER 0.001");
+  fullPrint("CURR:RANG 0.1");
+  fullPrint("TRAC:CLE:AUTO ON");
+  fullPrint("TRAC:POIN 1000");
+  fullPrint("TRAC:FEED SENS");
+  fullPrint("TRAC:FEED:CONT ALW");
+  fullPrint("TRIG:COUN INF");
+  fullPrint("TRIG:DEL 0");
+  fullPrint("DISP:ENAB ON");
+  fullPrint("INIT");
+}
+$current_handle = select (SOCK);
+$| = 1;
+select ($current_handle);
+
+# 09 Feb 2004 : GWA : Actual reading loop.
+
+if ($speed eq 'slow') {
+  while(1) {
+    $readSecond = 0;
+    sleep(1);
+    fullPrint("TRAC:NEXT?");
+    sysread(SOCK, $buffer, 1024);
+    chomp($buffer);
+    if ($buffer >= $last) {
+      my $num = $buffer - $last;
+      if ($num > 0) {
+        my $queryString = "TRAC:DATA:SEL? " . $last . ", " . $num;
+        $last = $buffer;
+        fullPrint($queryString);
+        $buffer = <SOCK>;
+      }
+    } else {
+      my $num = 1000 - $last; 
+      my $endPoint = $buffer;
+      if ($num > 0) {
+        my $queryString = "TRAC:DATA:SEL? " . $last . ", " . $num;
+        fullPrint($queryString);
+        $buffer = <SOCK>;
+      }
+      $num = $endPoint;
+      if ($num > 0) {
+        my $queryString = "TRAC:DATA:SEL? " . 0 . ", " . $num;
+        $last = $endPoint;
+        fullPrint($queryString);
+        $buffer2 = <SOCK>;
+        $readSecond = 1;
+      }
+    }
+    $buffer =~ s/([^,]*),([^,]*),([^,]*),*/$2\t$1\t$3\n/gs;
+    chomp($buffer);
+    print $buffer;
+    if ($readSecond) {
+      $buffer2 =~ s/([^,]*),([^,]*),([^,]*),*/$2\t$1\t$3\n/gs;
+      chomp($buffer2);
+      print $buffer2;
+    }
+    select((select(STDOUT), $| = 1)[0]);
+  }
+} elsif ($speed eq 'fast') {
+  sleep($wait);
+  print STDERR "Collecting Data\n";
+  fullPrint("DISP:ENAB ON");
+  fullPrint("FETCH?");
+  $buffer = <SOCK>;
+  $buffer =~ s/([^,]*),([^,]*),([^,]*),*/$2\t$1\t$3\n/gs;
+  print $buffer;
+  fullPrint("TRAC:CLE");
+  fullPrint("CONF:CURR:DC 0.1");
+  fullPrint("SYST:LOC");
+} 
+
+sub handleKill {
+  fullPrint("CONF:CURR:DC 0.1");
+  fullPrint("SYST:LOC");
+  close(SOCK);
+  exit();
+}
+
+sub fullPrint {
+  my $message = shift;
+  print SOCK $message . "\r\n";
+}

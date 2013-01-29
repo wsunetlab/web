@@ -1,0 +1,281 @@
+#!/usr/bin/env python
+
+import os, sys, re, socket, select, traceback, struct, cPickle, time, random, gzip, signal
+import asyncore
+from optparse import OptionParser
+from threading import Lock
+
+sys.path.append(os.path.join(os.environ["TOSROOT"], "support/sdk/python"))
+
+from tinyos.message import SerialPacket, Message
+
+SUBVERSION = " "
+
+class SocketListener(asyncore.dispatcher):
+  def __init__(self, socket, mp, VERSION, verbose=False):
+    asyncore.dispatcher.__init__(self, socket)
+    
+    self.connected = False
+    self.negotiated = False
+
+    self.mp = mp
+
+    self.readBuffer = ""
+    self.readBufferLock = Lock()
+    
+    self.VERSION = VERSION
+    self.SUBVERSION = SUBVERSION
+
+    self.writeBuffer = self.VERSION + self.SUBVERSION
+    self.writeBufferLock = Lock()
+
+    self.verbose = verbose
+
+  def handle_connect(self):
+    self.connected = True
+  
+  def handle_close(self):
+    self.display("Closing socket.")
+    self.connected = False
+    self.close()
+
+  def handle_error(self):
+    self.connected = False
+    self.close()
+
+  '''04 Mar 2009 : GWA : Reading from the socket, send to MP.'''
+
+  def readable(self):
+    return True
+  
+  def display(self, message):
+    if self.verbose:
+      mystring = "%s:%d" % self.getpeername()
+      print >>sys.stderr, mystring, message
+  
+  def handle_read(self):
+    self.readBuffer += self.recv(8192)
+    if len(self.readBuffer) > 0:
+      self.processReadBuffer()
+
+  def processReadBuffer(self):
+    if not self.negotiated and len(self.readBuffer) >= 2:
+      partner = self.readBuffer[0:2]
+      if partner[0] != self.VERSION:
+        self.display("SFProtocol: version error")
+        self.close()
+      else:
+        self.readBuffer = self.readBuffer[2:]
+        self.negotiated = True
+        self.display("Successfully negotiated.")
+    elif self.negotiated:
+      packets = []
+      while len(self.readBuffer) > 1:
+        packetLength = ord(self.readBuffer[0])
+        if len(self.readBuffer) < packetLength + 1:
+          break
+        packet = self.readBuffer[1:(packetLength + 1)]
+        self.readBuffer = self.readBuffer[(packetLength + 1):]
+        packets.append(packet)
+      if len(packets) > 0:
+        self.tomp(packets)
+
+  def tomp(self, packet):
+    # 04 Mar 2009 : GWA : Implemented differently depending on which direction.
+    pass
+  
+  '''04 Mar 2009 : GWA : Write data from MP to socket.'''
+  
+  def writable(self):
+    if not self.connected:
+      return False
+    if len(self.writeBuffer) > 0 and len(self.readBuffer) == 0:
+      return True
+    else:
+      return False
+  
+  def handle_write(self):
+    if not self.connected:
+      return False
+    if len(self.writeBuffer) == 0:
+      return True
+    tosend = self.writeBuffer
+    sent = self.send(tosend)
+    self.writeBuffer = self.writeBuffer[sent:]
+    return True
+
+  def tocon(self, data):
+    if not self.negotiated:
+      return False
+    self.writeBuffer += data
+    return True
+
+class ClientListener(SocketListener):
+  def __init__(self, socket, mp, verbose=False):
+    SocketListener.__init__(self, socket, mp, "M", verbose)
+    self.settimeout(0)
+
+  def tomp(self, packets):
+    tompstring = ""
+    for packet in packets:
+      addr = struct.unpack("!H", ''.join(packet[0:2]))[0]
+      packet = packet[2:]
+      mp.logpacket(packet, int(addr), True)
+      packet = chr(len(packet)) + packet
+      tompstring += packet
+    mp.fromclient(tompstring, int(addr))
+  
+  def handle_close(self):
+    self.display("Closing client socket.")
+    self.connected = False
+    self.close()
+
+class MoteListener(SocketListener):
+  def __init__(self, mp, addr, host, port, verbose=False):
+    SocketListener.__init__(self, None, mp, "U", verbose)
+    self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+    self.settimeout(0)
+    self.connect((host, port))
+    self.addr = int(addr)
+  
+  def tomp(self, packets):
+    tompstring = ""
+    for packet in packets:
+      mp.logpacket(packet, int(self.addr), False)
+      addr = struct.pack("!H", self.addr)
+      packet = addr + packet
+      packet = chr(len(packet)) + packet
+      tompstring += packet
+    mp.frommote(tompstring)
+  
+  def handle_close(self):
+    self.display("Closing client socket.")
+    self.connected = False
+    self.close()
+
+class MP(asyncore.dispatcher):
+  def __init__(self, host, port, verbose, pickleoutput):
+    asyncore.dispatcher.__init__(self)
+    self.port = port
+    self.host = host
+    self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+    self.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    self.bind((host, int(port)))
+    self.settimeout(0)
+    self.listen(5)
+    self.clients = []
+    self.motes = {}
+    self.verbose = verbose
+    self.pickle = False
+    if pickleoutput != None:
+      self.pickle = True
+      self.pickleoutput = gzip.open(pickleoutput, 'wb')
+  
+  def display(self, message):
+    if self.verbose:
+      print >>sys.stderr, message
+
+  def handle_accept(self):
+    socket, addr = self.accept()
+    self.clients.append(ClientListener(socket, self, verbose=self.verbose))
+
+  def addMote(self, host, port, addr):
+    self.motes[int(addr)] = \
+        MoteListener(self, addr, host, int(port), verbose=self.verbose)
+
+  def logpacket(self, packet, motelab_addr, sent=False):
+    if not self.pickle:
+      return
+    try:
+      m = SerialPacket.SerialPacket(packet[1:], data_length=len(packet) - 1)
+      
+      addr = m.get_header_src()
+      dest = m.get_header_dest()
+      type = m.get_header_type()
+      gid = m.get_header_group()
+      
+      data_start = m.offset_data(0) + 1
+      data_end = data_start + m.get_header_length()
+      data = packet[data_start:data_end]
+
+      m = Message.Message(data=data,
+                          data_length = len(data),
+                          addr=addr,
+                          gid=gid)
+      
+      # 14 Feb 2009 : GWA : Add our fields.
+      
+      m.amTypeSet(type)
+      m.time = time.time()
+      m.dest = dest
+      m.amTypeSet(type)
+      if sent:
+        m.motelab_dest = motelab_addr
+        m.sent = True
+        m.received = False
+      else:
+        m.motelab_src = motelab_addr
+        m.sent = False
+        m.received = True
+
+      try:
+        cPickle.dump(m, self.pickleoutput, -1)
+      except:
+        pass
+    except:
+      traceback.print_exc()
+
+  def fromclient(self, packet, addr):
+    if addr != 0xFFFF:
+      if not self.motes.has_key(addr):
+        return
+      mote = self.motes[addr]
+      if mote.connected and mote.negotiated:
+        self.motes[addr].tocon(packet)
+    else:
+      for mote in [m for m in self.motes.values() if m.connected and m.negotiated]:
+        mote.tocon(packet)
+
+  def frommote(self, packet):
+    for client in [c for c in self.clients if c.connected and c.negotiated]:
+      client.tocon(packet)
+
+if __name__=="__main__":
+  parser = OptionParser()
+  parser.add_option("-v", "--verbose", action="store_true", dest="verbose", help="Enable verbose output.")
+  parser.add_option("--pickleoutput", action="store", dest="pickleoutput", help="Where to log output.")
+  parser.set_defaults(verbose=False, pickleoutput=None)
+  (options, args) = parser.parse_args()
+
+  p = re.compile(r'([\w.]+):(\d+)')
+  m = p.match(args.pop(0))
+  if not m:
+    print "Bad server argument:", args, ". Exiting"
+    sys.exit(-1)
+  mp = MP(m.group(1), m.group(2), options.verbose, options.pickleoutput)
+  
+  def cleanup(signal, frame):
+    if mp.pickleoutput != None:
+      try:
+        mp.pickleoutput.close()
+      except:
+        pass
+    sys.exit(0)
+  
+  signal.signal(signal.SIGHUP, cleanup)
+  signal.signal(signal.SIGINT, cleanup)
+  signal.signal(signal.SIGTERM, cleanup)
+  signal.signal(signal.SIGQUIT, cleanup)
+
+  p = re.compile(r'([\w.]+):(\d+):(\d+)')
+  for arg in args:
+    m = p.match(arg)
+    if not m:
+      print >>sys.stderr, "Bad argument: ", arg, ". Skipping."
+      continue
+    mp.addMote(m.group(1), m.group(2), m.group(3))
+  try:
+    asyncore.loop(1)
+  except:
+    cleanup(None, None)
+    sys.exit(0)

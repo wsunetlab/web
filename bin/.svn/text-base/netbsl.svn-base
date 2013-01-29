@@ -1,0 +1,96 @@
+#!/usr/bin/perl
+use strict;
+use Sys::Syslog;
+use Net::Ping;
+
+my $USEGWA = 1;
+my $VERBOSE = 0;
+
+my @myARGV;
+
+foreach my $argument (@ARGV) {
+  if ($argument eq "--usegwa") {
+    $USEGWA = 1;
+  } elsif ($argument eq "--verbose") {
+    $VERBOSE = 1;
+  } else {
+    push(@myARGV, $argument);
+  }
+}
+
+if (@myARGV == 0) {
+  print<<USAGE;
+usage newbsl [host:port] [file|-] [args...]
+a file name of . means no file
+USAGE
+  exit 0;
+}
+
+my $HOSTPORT = shift @myARGV;
+$HOSTPORT =~ /([0-9\.]+)\:(\d+)/;
+my $HOST = $1;
+my $PORT = $2;
+openlog($0, '', 'user');
+syslog('info',"reprogramming: $HOST on port $PORT");
+
+my $FILE = shift @myARGV;
+
+my $p = Net::Ping->new();
+if (!$p->ping($HOST)) {
+  syslog('info',"$HOST:$PORT:FAIL Timeout");
+  print STDERR "Timeout\n";
+  closelog();
+  close(COMMANDOUTPUT);
+  $p->close();
+  exit(4);
+}
+$p->close();
+
+my $NUM = 0;
+if ($PORT == 10002) {
+  $NUM = 1;
+}
+
+eval {
+  my $output;
+  eval {
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    alarm 30;
+    if ($FILE ne ".") {
+      `scp -C $FILE root\@$HOST:/tmp/$NUM.ihex 2>/dev/null`;
+      $output = `ssh root\@$HOST /sbin/start $NUM t2 2>/dev/null`;
+    } else {
+      $output = `ssh root\@$HOST /sbin/stop $NUM 2>/dev/null`;
+    }
+    alarm 0;
+  };
+  if ($@) {
+    die unless $@ eq "alarm\n";
+    `pkill -9 -f \"scp -C $FILE root\@$HOST:/tmp/$NUM.ihex\"`;
+    `pkill -9 -f \"ssh root\@$HOST /sbin/start $NUM\"`;
+    `pkill -9 -f \"ssh root\@$HOST /sbin/stop $NUM\"`;
+    syslog('info',"$HOST:$PORT:GWA:FAIL Program");
+    print STDERR "Timeout.\n";
+    closelog();
+    exit(1);
+  }
+  if ($VERBOSE == 1) {
+    print $output;
+  }
+  if ($output !~ /SUCCESS/) {
+    syslog('info',"$HOST:$PORT:GWA:FAIL Program");
+    exit(1);
+  }
+  syslog('info',"$HOST:$PORT:GWA:SUCCESS");
+  closelog();
+  exit(0);
+};
+  
+if ($@) {
+  print STDERR "$@\n";
+  syslog('info',"$HOST:$PORT:GWA:FAIL");
+}
+
+closelog();
+exit(1);
+
