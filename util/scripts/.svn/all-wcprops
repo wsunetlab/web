@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/repos/motelab/!svn/ver/188/trunk/web/util/scripts
+END
+pingall.pl
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/repos/motelab/!svn/ver/11/trunk/web/util/scripts/pingall.pl
+END
+createIPTables.pl
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/repos/motelab/!svn/ver/11/trunk/web/util/scripts/createIPTables.pl
+END
+activateNodes.pl
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/repos/motelab/!svn/ver/11/trunk/web/util/scripts/activateNodes.pl
+END
+removeOldJobs.sh
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/repos/motelab/!svn/ver/188/trunk/web/util/scripts/removeOldJobs.sh
+END
+notifyPending.pl
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/repos/motelab/!svn/ver/11/trunk/web/util/scripts/notifyPending.pl
+END
+removeOldDB.sh
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/repos/motelab/!svn/ver/188/trunk/web/util/scripts/removeOldDB.sh
+END

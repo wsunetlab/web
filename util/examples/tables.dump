@@ -1,0 +1,245 @@
+-- MySQL dump 10.9
+--
+-- Host: localhost    Database: auth
+-- ------------------------------------------------------
+-- Server version	4.1.20
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `auth`
+--
+
+DROP TABLE IF EXISTS `auth`;
+CREATE TABLE `auth` (
+  `username` varchar(50) NOT NULL default '',
+  `password` varchar(32) NOT NULL default '',
+  `id` int(11) NOT NULL auto_increment,
+  `type` varchar(50) NOT NULL default 'normal',
+  `exec_dir` varchar(128) NOT NULL default '',
+  `firstname` varchar(20) NOT NULL default '',
+  `lastname` varchar(20) NOT NULL default '',
+  `dbname` varchar(30) NOT NULL default '',
+  `quota` int(11) NOT NULL default '0',
+  `used` int(11) NOT NULL default '0',
+  `academicInstitution` varchar(100) NOT NULL default '',
+  `isStudent` tinyint(2) NOT NULL default '0',
+  `advisorName` varchar(100) NOT NULL default '',
+  `advisorEmail` varchar(20) NOT NULL default '',
+  `jobDescription` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `connectivity`
+--
+
+DROP TABLE IF EXISTS `connectivity`;
+CREATE TABLE `connectivity` (
+  `seqno` int(11) NOT NULL default '0',
+  `created` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `groupno` int(11) NOT NULL default '0',
+  `tomote` int(11) NOT NULL default '0',
+  `frommote` int(11) NOT NULL default '0',
+  `num_samp` int(11) NOT NULL default '0',
+  `num_heard` int(11) NOT NULL default '0',
+  `totrssi` int(11) NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `daemons`
+--
+
+DROP TABLE IF EXISTS `daemons`;
+CREATE TABLE `daemons` (
+  `id` int(11) NOT NULL default '0',
+  `lastran` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `crontime` int(11) NOT NULL default '0',
+  `cronfreq` int(11) NOT NULL default '0',
+  `croncount` int(11) NOT NULL default '0',
+  `cronactive` int(11) NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `files`
+--
+
+DROP TABLE IF EXISTS `files`;
+CREATE TABLE `files` (
+  `id` int(11) NOT NULL auto_increment,
+  `path` varchar(128) NOT NULL default '',
+  `user` varchar(128) NOT NULL default '',
+  `uploaded` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `name` varchar(128) NOT NULL default '',
+  `description` text NOT NULL,
+  `type` varchar(12) NOT NULL default '',
+  `userid` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `health`
+--
+
+DROP TABLE IF EXISTS `health`;
+CREATE TABLE `health` (
+  `okCount` int(11) NOT NULL default '0',
+  `noProgramCount` int(11) NOT NULL default '0',
+  `noPingCount` int(11) NOT NULL default '0',
+  `counter` int(11) NOT NULL auto_increment,
+  `timeTaken` datetime default NULL,
+  PRIMARY KEY  (`counter`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `jobfiles`
+--
+
+DROP TABLE IF EXISTS `jobfiles`;
+CREATE TABLE `jobfiles` (
+  `jobid` int(11) NOT NULL default '0',
+  `fileid` int(11) NOT NULL default '0',
+  `moteid` int(11) NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `jobs`
+--
+
+DROP TABLE IF EXISTS `jobs`;
+CREATE TABLE `jobs` (
+  `name` varchar(128) NOT NULL default '',
+  `owner` varchar(50) NOT NULL default '',
+  `description` text NOT NULL,
+  `id` int(11) NOT NULL auto_increment,
+  `updated` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `created` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `disttype` varchar(12) NOT NULL default '',
+  `currentpanel` varchar(15) NOT NULL default 'namepanel',
+  `moteprogram` text NOT NULL,
+  `userid` int(11) NOT NULL default '0',
+  `powermanage` int(11) NOT NULL default '0',
+  `cronjob` int(11) NOT NULL default '0',
+  `lastran` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `crontime` int(11) NOT NULL default '0',
+  `cronfreq` int(11) NOT NULL default '0',
+  `croncount` int(11) NOT NULL default '0',
+  `cronactive` int(11) NOT NULL default '0',
+  `duringrun` text NOT NULL,
+  `postprocess` text NOT NULL,
+  `duringrunpid` int(11) NOT NULL default '0',
+  `dbloggerpid` int(11) NOT NULL default '0',
+  `cacheddb` text NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `jobschedule`
+--
+
+DROP TABLE IF EXISTS `jobschedule`;
+CREATE TABLE `jobschedule` (
+  `jobid` int(11) NOT NULL default '0',
+  `created` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `start` datetime NOT NULL default '0000-00-00 00:00:00',
+  `end` datetime NOT NULL default '0000-00-00 00:00:00',
+  `id` int(11) NOT NULL auto_increment,
+  `state` int(11) NOT NULL default '0',
+  `pid` int(11) NOT NULL default '0',
+  `jobtempdir` varchar(80) NOT NULL default '',
+  `dbprefix` varchar(30) NOT NULL default '',
+  `jobdaemon` varchar(50) NOT NULL default '',
+  `datapath` text NOT NULL,
+  `hidden` tinyint(1) NOT NULL default '0',
+  `quotacharge` int(11) NOT NULL default '0',
+  `realstart` datetime NOT NULL default '0000-00-00 00:00:00',
+  `realend` datetime NOT NULL default '0000-00-00 00:00:00',
+  `powerpid` int(11) NOT NULL default '0',
+  `zoneid` int(11) default NULL,
+  `moteprogram` text,
+  `duringrunpid` int(11) default NULL,
+  `cacheddb` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `motes`
+--
+
+DROP TABLE IF EXISTS `motes`;
+CREATE TABLE `motes` (
+  `moteid` int(11) NOT NULL default '0',
+  `mac_addr` varchar(20) NOT NULL default '',
+  `ip_addr` varchar(20) NOT NULL default '',
+  `created` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `active` tinyint(1) default NULL,
+  `contact` varchar(64) NOT NULL default '',
+  `textlocation` text NOT NULL,
+  `roomlocation` varchar(64) NOT NULL default '',
+  `jacknumber` varchar(10) NOT NULL default '',
+  `notes` text NOT NULL,
+  `comm_host` varchar(32) default NULL,
+  `comm_port` int(11) NOT NULL default '0',
+  `program_host` varchar(32) default NULL,
+  `program_port` int(11) NOT NULL default '0',
+  `pixelx` int(11) NOT NULL default '0',
+  `pixely` int(11) NOT NULL default '0',
+  `floor` int(11) NOT NULL default '0',
+  `linkquality` text NOT NULL,
+  `lastcontact` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `ping_ok` tinyint(1) default NULL,
+  `erase_ok` tinyint(1) default NULL,
+  `status_timestamp` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `firmware_version` varchar(32) default NULL,
+  `failedProgramCount` int(11) NOT NULL default '0',
+  `external_comm_host` varchar(32) default NULL,
+  `external_comm_port` int(11) NOT NULL default '0',
+  `hardwareModification` tinyint(4) default NULL,
+  `moteexists` int(11) default NULL,
+  `sf_pid` int(11) default NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `pending`
+--
+
+DROP TABLE IF EXISTS `pending`;
+CREATE TABLE `pending` (
+  `id` int(11) NOT NULL auto_increment,
+  `username` varchar(50) NOT NULL default '',
+  `firstname` varchar(20) NOT NULL default '',
+  `lastname` varchar(20) NOT NULL default '',
+  `academicInstitution` varchar(100) NOT NULL default '',
+  `isStudent` tinyint(2) NOT NULL default '0',
+  `advisorName` varchar(100) NOT NULL default '',
+  `advisorEmail` varchar(20) NOT NULL default '',
+  `jobDescription` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+--
+-- Table structure for table `zones`
+--
+
+DROP TABLE IF EXISTS `zones`;
+CREATE TABLE `zones` (
+  `name` varchar(128) NOT NULL default '',
+  `id` int(11) NOT NULL default '0',
+  `motes` text NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
