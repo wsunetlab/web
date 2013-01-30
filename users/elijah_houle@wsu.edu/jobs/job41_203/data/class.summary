@@ -1,0 +1,5 @@
+Dumping field info for message class #1Field	Type	Null	Key	Default	Extra
+counter	int(11)	YES		0	
+insert_time	timestamp	NO		CURRENT_TIMESTAMP	on update CURRENT_TIMESTAMP
+motelabMoteID	int(11)	YES		NULL	
+motelabSeqNo	int(11)	NO	PRI	NULL	auto_increment

@@ -1,0 +1,21 @@
+Attempting Connection...
+CREATE TABLE elijah_test5_207_109 ( counter INTEGER DEFAULT '0', insert_time TIMESTAMP, motelabMoteID INT , motelabSeqNo INT AUTO_INCREMENT PRIMARY KEY);
+DBLOGGER ERROR: dbDump: could not execute database query.  Exiting.
+com.mysql.jdbc.exceptions.jdbc4.MySQLSyntaxErrorException: Table 'elijah_test5_207_109' already exists
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:57)
+	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.lang.reflect.Constructor.newInstance(Constructor.java:532)
+	at com.mysql.jdbc.Util.handleNewInstance(Util.java:406)
+	at com.mysql.jdbc.Util.getInstance(Util.java:381)
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:1030)
+	at com.mysql.jdbc.SQLError.createSQLException(SQLError.java:956)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3558)
+	at com.mysql.jdbc.MysqlIO.checkErrorPacket(MysqlIO.java:3490)
+	at com.mysql.jdbc.MysqlIO.sendCommand(MysqlIO.java:1959)
+	at com.mysql.jdbc.MysqlIO.sqlQueryDirect(MysqlIO.java:2109)
+	at com.mysql.jdbc.ConnectionImpl.execSQL(ConnectionImpl.java:2642)
+	at com.mysql.jdbc.StatementImpl.executeUpdate(StatementImpl.java:1647)
+	at com.mysql.jdbc.StatementImpl.executeUpdate(StatementImpl.java:1566)
+	at dbDump.establishDBConnection(dbDump.java:481)
+	at dbDump.main(dbDump.java:749)

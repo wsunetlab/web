@@ -1,0 +1,16 @@
+EXTRACTED MESSAGE CLASSES:
+CLASS 1.
+	CLASSNAME: RadioCountMsg
+	AM ID: 6
+	FIELD 1.
+		NAME: counter
+		INDEX: 1
+		ISARRAY: false
+		TYPE: int
+		SIZE: 2
+	FIELD 2.
+		NAME: senderAdd
+		INDEX: 2
+		ISARRAY: false
+	TRYING TO CONNECT 0
+TRYING TO CONNECT 0

@@ -1,0 +1,43 @@
+EXTRACTED MESSAGE CLASSES:
+CLASS 1.
+	CLASSNAME: TestSerialMsg
+	AM ID: 137
+	FIELD 1.
+		NAME: counter
+		INDEX: 1
+		ISARRAY: false
+		TYPE: int
+		SIZE: 2
+O_INCREMENT PRIMARY KEY);
+TRYING TO CONNECT 0
+TRYING TO CONNECT 0
+TRYING TO CONNECT 0
+TRYING TO CONNECT 0
+WARNING: Couldn't connect to 0 at time Thu Jan 17 16:48:17 PST 2013. Attempt 1
+TRYING TO CONNECT 1
+java.io.IOException: interrupted
+	at net.tinyos.packet.PhoenixSource.awaitStartup(PhoenixSource.java:72)
+	at net.tinyos.message.MoteIF.init(MoteIF.java:123)
+	at net.tinyos.message.MoteIF.<init>(MoteIF.java:110)
+	at dbDump$dbConnection.tryConnect(dbDump.java:1124)
+	at dbDump$dbConnection.error(dbDump.java:1168)
+	at net.tinyos.packet.PhoenixSource.run(PhoenixSource.java:174)
+WARNING: Couldn't connect to 0 at time Thu Jan 17 16:48:47 PST 2013. Attempt 2
+TRYING TO CONNECT 2
+java.io.IOException: interrupted
+	at net.tinyos.packet.PhoenixSource.awaitStartup(PhoenixSource.java:72)
+	at net.tinyos.message.MoteIF.init(MoteIF.java:123)
+	at net.tinyos.message.MoteIF.<init>(MoteIF.java:110)
+	at dbDump$dbConnection.tryConnect(dbDump.java:1124)
+	at dbDump$dbConnection.error(dbDump.java:1168)
+	at net.tinyos.packet.PhoenixSource.run(PhoenixSource.java:174)
+WARNING: Couldn't connect to 0 at time Thu Jan 17 16:49:17 PST 2013. Attempt 3
+TRYING TO CONNECT 3
+java.io.IOException: interrupted
+	at net.tinyos.packet.PhoenixSource.awaitStartup(PhoenixSource.java:72)
+	at net.tinyos.message.MoteIF.init(MoteIF.java:123)
+	at net.tinyos.message.MoteIF.<init>(MoteIF.java:110)
+	at dbDump$dbConnection.tryConnect(dbDump.java:1124)
+	at dbDump$dbConnection.error(dbDump.java:1168)
+	at net.tinyos.packet.PhoenixSource.run(PhoenixSource.java:174)
+WARNING: Couldn't connect to 0 at time Thu Jan 17 16:49:47 PST 2013. Attempt 4
