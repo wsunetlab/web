@@ -1,0 +1,170 @@
+<?php
+  $_DISPLAYNEW = false;
+  $_DISPLAYLOGIN = false;
+  include "nav/default_top.php";
+
+  /*
+   * motes-info.php
+   *
+   * INPUTS: 
+   *
+   * OUTPUTS:
+   *
+   * FUNCTION:
+   *
+   * GOES:
+   *
+   * CREATED: 07 Dec 2003
+   *
+   * AUTHOR: GWA
+   */
+?>
+<?php
+
+global $a;
+
+global $_DSN;
+
+$DB = DB::connect($_DSN);
+
+if (DB::isError($DB)) {
+  die ($DB->GetMessage());
+}
+
+$latestInfoQuery = "select UNIX_TIMESTAMP(created) as created" .
+                   " from connectivity order by groupno desc" .
+                   " limit 1";
+$latestInfoResult = doDBQuery($latestInfoQuery);
+$latestInfoRow = $latestInfoResult->fetchRow(DB_FETCHMODE_ASSOC);
+$latestInfo = date("j M Y \a\\t G:i:s", $latestInfoRow['created']);
+
+$floorCountQuery = "select count(*) as motecount" .
+                   " from motes where floor = 1";
+$floorCountResult = doDBQuery($floorCountQuery);
+$floorCountRow = $floorCountResult->fetchRow(DB_FETCHMODE_ASSOC);
+$motecount1 = $floorCountRow['motecount'];
+
+$floorCountQuery = "select count(*) as motecount" .
+                   " from motes where floor = 2";
+$floorCountResult = doDBQuery($floorCountQuery);
+$floorCountRow = $floorCountResult->fetchRow(DB_FETCHMODE_ASSOC);
+$motecount2 = $floorCountRow['motecount'];
+
+$floorCountQuery = "select count(*) as motecount" .
+                   " from motes where floor = 3";
+$floorCountResult = doDBQuery($floorCountQuery);
+$floorCountRow = $floorCountResult->fetchRow(DB_FETCHMODE_ASSOC);
+$motecount3 = $floorCountRow['motecount'];
+?>
+<p>
+Last updated <strong><?php echo $latestInfo;?></strong>.
+<br><br>
+The maps below show current mote locations and connectivity information.
+Click on any for a larger, more customizable image.
+
+</p>
+<table border=1px align=center width=auto style="border-collapse:collapse;">
+  <tr>
+    <td style="background-color:#e0e0e0;padding-left:10px;">
+      <strong>MD First Floor:</strong> <?php echo $motecount1; ?> Motes
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:10px;">
+      <a href="view-map.php?floor=1">
+        <center><img height="<?php echo $_SMALLIMAGEY;?>"
+                     width="<?php echo $_SMALLIMAGEX;?>" 
+                     src="img/connectcache/1-SMALL.jpg" border=0></center>
+      </a>
+    </td>
+  </tr>
+  <tr>
+    <td style="background-color:#e0e0e0;padding-left:10px;">
+      <strong>MD Second Floor:</strong> <?php echo $motecount2; ?> Motes
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:10px;">
+      <a href="view-map.php?floor=2">
+        <center><img height="<?php echo $_SMALLIMAGEY;?>"
+                     width="<?php echo $_SMALLIMAGEX;?>" 
+                     src="img/connectcache/2-SMALL.jpg" border=0></center>
+      </a>
+    </td>
+  </tr>
+  </tr>
+    <td style="background-color:#e0e0e0;padding-left:10px;">
+      <strong>MD Third Floor:</strong> <?php echo $motecount3; ?> Motes
+    </td>
+  </tr>
+  <tr>
+    <td style="padding:10px;">
+      <a href="view-map.php?floor=3">
+        <center><img height="<?php echo $_SMALLIMAGEY;?>"
+                     width="<?php echo $_SMALLIMAGEX;?>" 
+                     src="img/connectcache/3-SMALL.jpg" border=0></center>
+      </a>
+    </td>
+  </tr>
+</table>
+
+<?php if ($a->getAuth()) { ?>
+
+<br>
+<br>
+
+<?php
+  $troubledQuery = "select moteid, UNIX_TIMESTAMP(lastcontact) as lastworked," .
+                   " contact, roomlocation, textlocation, notes from " .
+                   $_MOTESTABLENAME . " where linkquality = '' and active <> 0";
+  $troubledResult = doDBQuery($troubledQuery);
+
+  if ($troubledResult->numRows() != 0) {
+?>
+
+<center>
+<h3 style="color:grey;">Troubled Motes</h3>
+</center>
+<p>
+<table border=0
+       hspace=4
+       cellpadding=5px
+       style="border-collapse:collapse;
+              empty-cells:show;
+              width:90%;">
+<tr bgcolor="#e0e0e0">
+<th width=5% bgcolor="#e0e0e0"><b>MoteID</b></th>
+<th width=15% bgcolor="#e0e0e0"><b>Last Worked</b></th>
+<th width=10% bgcolor="#e0e0e0"><b>Contact</b></th>
+<th width=5% bgcolor="#e0e0e0"><b>Root</b></th>
+<th width=20% bgcolor="#e0e0e0"><b>Location</b></th>
+<th width=35% bgcolor="#e0e0e0"><b>Notes</b></th>
+</tr>
+
+<?php
+    while ($moteinfo = $troubledResult->fetchRow(DB_FETCHMODE_ASSOC)) {
+      if ($moteinfo['lastworked'] == 0) {
+        $lastworked = "Never";
+      } else {
+$latestInfo = date("j M Y \a\\t G:i:s", $latestInfoRow['created']);
+        $lastworked = date("j M Y G:i", $moteinfo['lastworked']);
+      }
+
+      print "<tr><td style='color:red;'>" . $moteinfo['moteid'] . "</td>" .
+            "<td>$lastworked</td>" .
+            "<td><a href=\"mailto:" . $moteinfo['contact'] . "\">" .
+            $moteinfo['contact'] . "</a></td>" .
+            "<td>" . $moteinfo['roomlocation'] . "</td>" .
+            "<td>" . $moteinfo['textlocation'] . "</td>" .
+            "<td>" . $moteinfo['notes'] . "</td></tr>\n";
+    }
+?>
+
+</table>
+<?php } ?>
+
+<?php
+  }
+
+  include "nav/default_bot.php";
+?>

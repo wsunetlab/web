@@ -1,0 +1,87 @@
+<?php include_once "phpdefaults.php"; ?>
+<div id="title">
+  <div id="titleimage">
+    <a href="index.php">
+  <!--  <img src="img/logo.png" height=60px width=187px border=0>-->
+<img src="img/wsuvancouver_logo2.jpg" height=65px width=366px border=0>
+    </a>
+  </div>
+  <div id="titletop">
+  <div id="titlemain" class="titleelementleft">
+    <a href="index.php" style="text-decoration:none;">
+      <font color=#800000 size="5"> Rainier: A Wireless Sensor Network Testbed </font>
+    </a>
+  </div>
+  </div>
+  <div id="titlebottom">
+    <div class="titleelementright">
+    <?php if ($a->getAuth()) { ?>
+      <a class="titleauthlink" href="user-home.php">home</a>
+    <?php } else { ?>
+      <a class="titlelink" href="index.php">home</a>
+    <?php } ?>
+  </div>
+  <?php if ($a->getAuth()) { ?>
+    <div class="titleelementright">
+      <a class="titleauthlink"
+         href="<?php echo $_SERVER['PHP_SELF']; ?>?logout=true">logout</a>
+    </div>
+  <?php } ?>
+  <div class="titleelementright">
+    <?php if (!$a->getAuth()) { ?>
+      <a class="titlelink" href="faq.php">faq</a>
+    <?php } ?>
+  </div>
+  <div class="titleelementright">
+    <?php if (!$a->getAuth()) { ?>
+      <a class="titlelink" href="user-signup.php">signup</a>
+    <?php } ?>
+  </div>
+  <div class="titleelementright">
+    <?php if ($a->getAuth()) { ?>
+      <a class="titleauthlink" href="index.php">about</a>
+    <?php } else { ?>
+      <a class="titlelink" href="about.php">about</a>
+    <?php } ?>
+  </div>
+  <div class="titleelementright">
+    <?php if ($a->getAuth()) { ?>
+      <a class="titleauthlink" href="motes-status.php">status</a>
+    <?php } else { ?>
+      <a class="titlelink" href="motes-status.php">status</a>
+    <?php } ?>
+  </div>
+  <div class="titleelementright">
+    <?php if ($a->getAuth()) { ?>
+      <a class="titleauthlink" href="motes-info.php">maps</a>
+    <?php } else { ?>
+      <a class="titlelink" href="motes-info.php">maps</a>
+    <?php } ?>
+  </div>
+  <?php if ($a->getAuth()) {
+    if (getSessionVariable('type') == "admin") { ?>
+      <div class="titleelementright">
+        <a class="titleadminlink" href="zone-edit.php">zone admin</a>
+      </div>
+      <div class="titleelementright">
+        <a class="titleadminlink" href="user-create.php">user admin</a>
+      </div>
+    <?php } ?> 
+    <div class="titleelementright">
+      <a class="titleauthlink" href="topology-create.php">topology admin</a>
+    </div>
+    <div class="titleelementright">
+      <a class="titleauthlink" href="jobs-edit.php">edit job</a>
+    </div>
+    <div class="titleelementright">
+      <a class="titleauthlink" href="jobs-create.php">create job</a>
+    </div>
+    <div class="titleelementright">
+      <a class="titleauthlink" href="view-schedule.php">schedule</a>
+    </div>
+    <div class="titleelementright">
+      <a class="titleauthlink" href="user-info.php">user info</a>
+    </div>
+  <?php } ?>
+  </div>
+</div>

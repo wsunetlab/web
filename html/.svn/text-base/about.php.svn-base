@@ -1,0 +1,39 @@
+<?php
+  $_DISPLAYNEW = false;
+  $_DISPLAYLOGIN = false;
+  include "nav/default_top.php";
+?>
+<p>
+  For details about the makeup of the lab itself, please visit the
+  <a href="index.php">main moteLab page</a>.
+</p>
+<p>
+  The MoteWeb interface was conceived by 
+  <a href="http://www.eecs.harvard.edu/~mdw">Matt Welsh</a> and
+  <a href="http://www.eecs.harvard.edu/~werner">Geoffrey Werner-Allen</a>. 
+  The interface is implemented using 
+  <a href="http://www.php.net">PHP</a>
+  and Javascript.  It uses 
+  <a href="http://www.mysql.com">MySQL</a> as its backend database.
+</p>
+<p>
+  The implementation of MoteWeb was considerably simplified by the use of
+  authentication and database PHP modules provided by
+  <a href="http://pear.php.net">PEAR</a>.
+</p>
+<p>
+  The MoteWeb interface is currently deployed at 
+  <a href="http://www.harvard.edu">Harvard University</a>.
+  However, the developers are confident that it can easily be deployed at
+  other institutions.  Questions about obtaining access to the source code
+  for the web interface should be directed to 
+  <a href="mailto:<?= $_MOTELABADMINADDRESS?>">The MoteLab administrators</a>.
+</p>
+<p>
+  gwa would also like to thank many early MoteLab users who have been patient
+  in the face of frequent problems.  The entire CS263 class was helpful and
+  patient while doing a course assignment on the lab, but users DM, PZ, and
+  BD receive special points for helping push MoteLab along.
+<?php
+  include "nav/default_bot.php";
+?>
