@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 44
+/repos/motelab/!svn/ver/189/trunk/web/daemon
+END
+libml_prog.pm
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/repos/motelab/!svn/ver/11/trunk/web/daemon/libml_prog.pm
+END
+blank.ihex
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/repos/motelab/!svn/ver/11/trunk/web/daemon/blank.ihex
+END
+libml_job.pm
+K 25
+svn:wc:ra_dav:version-url
+V 57
+/repos/motelab/!svn/ver/189/trunk/web/daemon/libml_job.pm
+END
+libml_misc.pm
+K 25
+svn:wc:ra_dav:version-url
+V 58
+/repos/motelab/!svn/ver/170/trunk/web/daemon/libml_misc.pm
+END
+cents-daemon.pl
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/repos/motelab/!svn/ver/189/trunk/web/daemon/cents-daemon.pl
+END

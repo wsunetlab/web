@@ -1,0 +1,1244 @@
+#!/usr/bin/perl
+
+#
+# NAME : job-daemon.pl
+#
+# PURPOSE : Used to move jobs on and off of the mote lab.
+#
+# NOTES: 
+#   1) 03 Aug 2003 : GWA : Right now this is set up to run as a cron job,
+#                    perhaps every five minutes or so.  This creates slight
+#                    scheduling irregularities but it's not a big problem.
+#                    Eventually a more intelligent version may be written
+#                    that would interact more carefully with the database to
+#                    know when to sleep and wake.
+#
+# CREATED : 02 Aug 2003
+#
+# AUTHOR : GWA (gwa@post.harvard.edu)
+#
+
+use DBI;
+use strict;
+use Thread;
+
+#
+# CONSTANTS
+#
+# 03 Aug 2003 : GWA : These should be standardized somewhere, but for now
+#               they are here.  If these change this script WILL NOT WORK.
+#
+
+our ($_JOBSCHEDULETABLENAME,
+    $_DSN,
+    $_JOBSTABLENAME,
+    $_JOBFILESTABLENAME,
+    $_FILESTABLENAME,
+    $_USERROOT,
+    $_MOTEINFOTABLENAME,
+    $_SETMOTEID,
+    $_AVROBJCOPY,
+    $_TMPROOT,
+    $_JAVAW,
+    $_REMOTEUISP,
+    $_DBLOGGER,
+    $_JAR,
+    $_DBDUMPUSER,
+    $_DBDUMPPASSWORD,
+    $_SESSIONTABLENAME,
+    $_JOBDATAROOT,
+    $_DATAUPDATEROOT,
+    $_ZIP,
+    $_CHOWN,
+    $_CHGRP,
+    $_WEBUSER,
+    $_JOBDAEMON,
+    $_HAVEPOWERCOLLECT,
+    $_POWERCOLLECTCMD,
+    $_EXTERNALSF,
+    $_SFHOSTIPADDR);
+
+require "sitespecific.pl";
+
+my $_AVROBJCOPYLOGFILE;
+my $_REMOTEUISPLOGFILE;
+my $_DBLOGGERLOGFILE;
+my $_POWERMANAGEFILE;
+
+# 07 Dec 2003 : GWA : These need to be kept in synch with
+#                     nav/phpdefaults.php.
+
+my $_JOBPENDING = 0;
+my $_JOBRUNNING = 1;
+my $_JOBFINISHED = 2;
+my $_JOBSTARTPROBLEM = 3;
+my $_JOBENDPROBLEM = 4;
+my $_JOBPLEASEDELETE = 5;
+my $_MOTEREPROPORT = 10001;
+my $_MOTECOMMPORT = 10002;
+my $_MOTEPORTBASE = 9000;
+
+# 03 Aug 2003 : GWA : Actually +1 the number of motes.
+
+my $_DBLOGGERNAME = "dbDump";
+
+# 06 Sep 2004 : swies : allow daemon support to be switched for testing
+my $_DAEMONSUPPORT = 1;
+
+# 03 Aug 2003 ; GWA : For timing, script output.
+
+my $timeStart = time();
+my $outputStart = $_JOBDAEMON . " ran @ " . localtime() . "\n";
+my $jobOwner = "";
+
+# 03 Aug 2003 : GWA : For reprogramming logic purposes.
+
+my $oldJob = 0;
+my $newJob = 0;
+
+# 16 Oct 2003 : GWA : Adding some command-line stuff.
+
+my $doStop = 0;
+my $doRestart = 0;
+
+if ($ARGV[0] eq "start") {
+  # 16 Oct 2003 : GWA : This is the default
+} elsif ($ARGV[0] eq "stop") {
+  # 16 Oct 2003 : GWA : Stop any job currently running and exit.
+  $doStop = 1;
+} elsif ($ARGV[0] eq "restart") {
+  # 16 Oct 2003 : GWA : Stop any currently running jobs, marking the most
+  #               stopped as 'unstarted' and restart that job.
+  $doRestart = 1;
+}
+
+#
+# CONNECT
+#
+# 03 Aug 2003 : GWA : First we need to access the database.  Right now one
+#               database contains all of the tables that we need, which is
+#               the ideal setup.
+#
+
+my $ourDB = DBI->connect($_DSN)
+  or die "Couldn't connect to database: $DBI::errstr\n";
+
+#
+# KILL OLD JOBS
+#
+# 03 Aug 2003 : GWA : Next we find out if there are running jobs that
+#               need to be removed before we reschedule.  To do this we look
+#               for jobs that are running and should have ended already.
+#               There should only be one and it needs to be removed from the
+#               lab before we can schedule something else.
+#
+
+my $runningRoot = "select id, jobid, start, pid, jobtempdir, dbprefix," .
+                " jobdaemon, powerpid, moteprogram," .
+                " UNIX_TIMESTAMP(start) as unixstart," .
+                " UNIX_TIMESTAMP(end) as unixend, quotacharge from " . 
+                $_JOBSCHEDULETABLENAME . 
+                " where jobdaemon=\"" . $_JOBDAEMON . "\"" .
+                " and ((state=" . $_JOBPLEASEDELETE .
+                " and start <= NOW()) and pid!=0" .
+                " or (state=" . $_JOBRUNNING . 
+my $runningQuery;
+# 16 Oct 2003 : GWA : If we don't care whether or not it's finished don't add
+#               anything.
+if ($doStop || $doRestart) {
+  $runningQuery = $runningRoot . "))"; 
+} else {
+  $runningQuery = $runningRoot . " and end <= NOW()))";
+}
+
+$runningQuery .= " order by unixend";
+my $runningStatement;
+$runningStatement = $ourDB->prepare($runningQuery)
+  or die "Couldn't prepare query '$runningStatement': $DBI::errstr\n";
+$runningStatement->execute();
+
+# 03 Aug 2003 : GWA : If there's nothing running, there's nothing to do.
+
+my $foundRunningJobs = 0;
+my $nextState = $_JOBFINISHED;
+my $numberRunning = $runningStatement->rows;
+
+# 18 Aug 2003 : GWA : If there is more than one job marked running, then 
+#               a problem has occured.
+#
+# zone: not true anymore, looks like the JOBENDPROBLEM state is obsolete
+#if ($numberRunning <= 1) {
+#  $nextState = $_JOBFINISHED;
+#} else {
+#  $outputStart .= "\tMore than one job found marked running!  Killing all.\n";
+#  $nextState = $_JOBENDPROBLEM;
+#}
+
+# 18 Aug 2003 : GWA : Find all old jobs marked 'running' in the database,
+#               kill them, and update the database.
+
+my @jobPIDs;
+my $i = 0;
+my @runningRefs;
+# zone: we need an array of old jobs instead of lastRunningRef
+
+while (my $runningRef = $runningStatement->fetchrow_hashref()) {
+  
+  # 18 Aug 2003 : GWA : Mark that we had an old job.
+  
+  $oldJob = 1;
+
+  # 03 Aug 2003 : GWA : The normal path.  First mark the old job finished.
+ 
+  # 16 Oct 2003 : GWA : We'll sneak in here in the 'restart' case.  Here we
+  #               want to mark the currently running job as active 'if' it is
+  #               actually the most recent.  Otherwise we'll just mark it as
+  #               a problem as usual.
+
+# zone: we'll restart all the currently running jobs, I think this is right
+#  if ($doRestart &&
+#      ($i == $numberRunning - 1)) {
+  if ($doRestart) {
+    $nextState = $_JOBPENDING;
+  }
+
+  my $updateQuery = "update " .
+                 $_JOBSCHEDULETABLENAME .
+                 " set state=" . $nextState .
+                 " where id=" . $runningRef->{'id'};
+  my $updateStatement;
+  $updateStatement = $ourDB->prepare($updateQuery)
+    or die "Couldn't prepare query '$updateStatement': $DBI::errstr\n";
+  $updateStatement->execute();
+  
+  # 18 Aug 2003 : GWA : We'll start the kill now, then continue it later if
+  #               needed.
+
+  # zone: I think the pid, powerpid, and duringrunpid stuff is allright
+  
+  my $killCnt = kill 15, $runningRef->{'pid'};
+  
+  # 30 Jan 2004 : GWA : Adding support for power manangement.
+
+  my $powerKillCnt = 0;
+  if ($runningRef->{'powerpid'} != 0) {
+    $powerKillCnt = kill 15, $runningRef->{'powerpid'};
+  }
+  if ($powerKillCnt != 0) {
+    push(@jobPIDs, $runningRef->{'powerpid'});
+  }
+  my $duringRunQuery = "select duringrunpid from " .
+                 $_JOBSTABLENAME .
+                 " where id=" . $runningRef->{'jobid'};
+  my $duringRunStatement;
+  $duringRunStatement = $ourDB->prepare($duringRunQuery)
+    or die "Couldn't prepare query '$duringRunQuery': $DBI::errstr\n";
+  $duringRunStatement->execute();
+  my $duringRunRef = $duringRunStatement->fetchrow_hashref();
+  if ($duringRunRef->{'duringrunpid'} != 0) {
+    $powerKillCnt = kill 15, $duringRunRef->{'duringrunpid'};
+    my $duringRunUpdate = "update " . 
+                   $_JOBSTABLENAME . " set duringrunpid=0" . 
+                   " where id=" . $runningRef->{'jobid'};
+    my $duringRunUpdateStatement;
+    $duringRunUpdateStatement = $ourDB->prepare($duringRunUpdate)
+      or die "Couldn't prepare query '$duringRunUpdate': $DBI::errstr\n";
+    $duringRunUpdateStatement->execute();
+  }
+
+  if ($powerKillCnt != 0) {
+    push(@jobPIDs, $duringRunRef->{'duringrunpid'});
+  }
+
+  #
+  # 09 Mar 2004 : GWA : Hacking this up to set up seperate serial forwarders
+  #               for each mote.
+
+  # zone: lets get a list of the motes this job is using right now, then only kill things associated with those
+  my @currentMoteProg = ();
+  my @moteProgTemp = split(/\|/, $runningRef->{'moteprogram'});
+  foreach my $moteProgEntry (@moteProgTemp) {
+    my @tmp = split(/,/, $moteProgEntry);
+    $currentMoteProg[$tmp[0]] = $tmp[1];
+  }
+
+  my $moteBasicQuery = "select moteid, ip_addr, comm_port, sf_pid from " .
+                       $_MOTEINFOTABLENAME .
+                       " where active=1";
+  my $moteBasicStatement;
+  $moteBasicStatement = $ourDB->prepare($moteBasicQuery)
+    or die "Couldn't prepare query '$moteBasicQuery': $DBI::errstr\n";
+  $moteBasicStatement->execute();
+
+  # 09 Mar 2004 : GWA : Seems to make sense to do the kill and the start
+  #               seperately.
+  my $sfKillCnt;
+  while (my $moteBasicRef = $moteBasicStatement->fetchrow_hashref()) {
+    # zone: only kill SFs for this job's motes
+    if (defined($currentMoteProg[$moteBasicRef->{'moteid'}])) {
+      if ($moteBasicRef->{'sf_pid'} != 0) {
+        $sfKillCnt = kill 15, $moteBasicRef->{'sf_pid'};
+      }
+      if ($sfKillCnt != 0) {
+        push(@jobPIDs, $moteBasicRef->{'sf_pid'});
+      }
+      # zone: set sf_pid to 0 here since we can't just do it for all active motes anymore
+      my $moteUpdateQuery = "update " . $_MOTEINFOTABLENAME .
+                           " set sf_pid=0" . 
+                           " where moteid=" . $moteBasicRef->{'moteid'};
+      my $moteUpdateStatement;
+      $moteUpdateStatement = $ourDB->prepare($moteUpdateQuery)
+        or die "Couldn't prepare query '$moteUpdateQuery': $DBI::errstr\n";
+      $moteUpdateStatement->execute();
+    }
+  }
+
+  # 02 Sep 2003 : GWA : If we weren't able to signal the process, perhaps it
+  #               went away already.  In that case, we don't need to ping it
+  #               again.
+
+  if ($killCnt != 0) {
+    push(@jobPIDs, $runningRef->{'pid'});
+  }
+
+  # 03 Aug 2003 : GWA : Update output.
+
+  $outputStart .= "\tKilled old job with jobID $runningRef->{'jobid'}\n";
+  $i++;
+  push(@runningRefs, $runningRef);
+}
+
+# 30 Apr 2004 : GWA : <Sigh>.  We've got to do this up here as well, just to
+#               see if we need to shut the daemon down.
+
+# zone: this shouldn't be limited to one.  Well, it's not that important since this is only used to tell if one or more pending jobs exist...
+
+my $pendingQuery = "select id, jobid, start," . 
+                " UNIX_TIMESTAMP(start) as unixstart," .
+                " UNIX_TIMESTAMP(end) as unixend from " .
+                $_JOBSCHEDULETABLENAME .
+                " where state=" . $_JOBPENDING . 
+                " and start <= NOW()" . 
+                " and end > NOW()" .
+                " order by start limit 1";
+my $pendingStatement;
+$pendingStatement = $ourDB->prepare($pendingQuery)
+  or die "Couldn't prepare query '$pendingStatement': $DBI::errstr\n";
+$pendingStatement->execute();
+
+# zone: daemon stuff should be fine, we'll only allow those on the whole lab for now
+
+my $needClear = 0;
+# 30 Apr 2004 : GWA : Look for running daemons.
+if ($numberRunning == 0 && $_DAEMONSUPPORT != 0) {
+  my $daemonInfoQuery = "select id, postprocess, duringrunpid," .
+                        " UNIX_TIMESTAMP(lastran) as unixran," .
+                        " crontime, dbloggerpid, cacheddb from " . 
+                        $_JOBSTABLENAME . 
+                        " where cronactive=1";
+  my $daemonInfoStatement;
+  $daemonInfoStatement = $ourDB->prepare($daemonInfoQuery) 
+    or die "Couldn't prepare query `$daemonInfoQuery': $DBI::errstr\n";
+  $daemonInfoStatement->execute();
+  if ($daemonInfoStatement->rows != 0) {
+    my $daemonInfoRef = $daemonInfoStatement->fetchrow_hashref();
+    # 30 Apr 2004 : GWA : Kill if it's done or there's another job about to
+    #               run.
+    
+    if ((($daemonInfoRef->{'unixran'} + (60 * $daemonInfoRef->{'crontime'}))
+          < $timeStart) || ($pendingStatement->rows > 0)) {
+      my $killCnt = kill 15, $daemonInfoRef->{'dbloggerpid'};
+      if ($daemonInfoRef->{'duringrunpid'} != 0) {
+        $killCnt = kill 15, $daemonInfoRef->{'duringrunpid'};
+      }
+      #
+      # 09 Mar 2004 : GWA : Hacking this up to set up seperate serial forwarders
+      #               for each mote.
+
+      my $moteBasicQuery = "select ip_addr, comm_port, sf_pid from " .
+                           $_MOTEINFOTABLENAME .
+                           " where active=1";
+      my $moteBasicStatement;
+      $moteBasicStatement = $ourDB->prepare($moteBasicQuery)
+        or die "Couldn't prepare query '$moteBasicQuery': $DBI::errstr\n";
+      $moteBasicStatement->execute();
+
+      # 09 Mar 2004 : GWA : Seems to make sense to do the kill and the start
+      #               seperately.
+      my $sfKillCnt;
+      while (my $moteBasicRef = $moteBasicStatement->fetchrow_hashref()) {
+        if ($moteBasicRef->{'sf_pid'} != 0) {
+          $sfKillCnt = kill 15, $moteBasicRef->{'sf_pid'};
+        }
+        if ($sfKillCnt != 0) {
+          push(@jobPIDs, $moteBasicRef->{'sf_pid'});
+        }
+      }
+      $needClear = 1;
+      if ($daemonInfoRef->{'postprocess'} ne "") {
+        my $postProcessCmd = $daemonInfoRef->{'postprocess'} . " " . 
+                             $daemonInfoRef->{'cacheddb'};
+        print $postProcessCmd; 
+        my $postProcessPID = fork();
+        if ($postProcessPID == 0) {
+          exec($postProcessCmd);
+        }
+      }
+      my $updateQuery = "update " .
+                        $_JOBSTABLENAME . 
+                        " set cronactive=0" .
+                        ", duringrunpid=0" .
+                        ", cacheddb=\"\"" .
+                        ", dbloggerpid=0" .
+                        " where id=" . $daemonInfoRef->{'id'};
+      my $updateStatement; 
+      $updateStatement = $ourDB->prepare($updateQuery) 
+        or die "Couldn't prepare query '$updateStatement': $DBI::errstr\n";
+      $updateStatement->execute();
+    }
+  }
+}
+# 02 Sep 2003 : GWA : Give things a minute to die.
+
+if ($oldJob) {
+  sleep(2);
+}
+
+# 18 Aug 2003 : GWA : Finish the kill all here.  Anything that hasn't 
+#               exited by now we'll try and force out.
+
+my $foundLaggart = 0;
+foreach my $currentPID (@jobPIDs) {
+  if (kill(0, $currentPID)) {
+    $outputStart .= "\tJob with PID $currentPID needed help dying!\n";
+    kill 9, $currentPID;
+    $foundLaggart = 1;
+  }
+}
+
+# 18 Aug 2003 : GWA : If something slowed down our killall, wait a bit for
+#               it.
+
+if ($foundLaggart) {
+  sleep(5);
+}
+
+# 25 May 2004 : GWA : HACKHACK : For whatever reason sometimes the
+#               serialforwarders don't want to die... this isn't so good, so
+#               kill them all off here (this will also take care of killing
+#               any scripts that shouldn't be
+#               running.
+
+# zone: This shouldn't be needed since we take care of the serial forwarders
+#       above.  If those kills fail the administrator will just have to
+#       take care of the extra processes.
+
+#if ($oldJob || $needClear) {
+#  print "running killjava script...\n";
+#  print `./killjavashit`;
+#  print "done\n";
+#}
+
+if ($needClear) {
+  # 09 Mar 2004 : GWA : Update database for sf_pid
+
+  # zone: this code only runs after a daemon is killed, we set sf_pid to 0 when we do the kill for normal jobs
+
+  my $moteUpdateQuery = "update " . $_MOTEINFOTABLENAME .
+                       " set sf_pid=0" . 
+                       " where active=1";
+  my $moteUpdateStatement;
+  $moteUpdateStatement = $ourDB->prepare($moteUpdateQuery)
+    or die "Couldn't prepare query '$moteUpdateQuery': $DBI::errstr\n";
+  $moteUpdateStatement->execute();
+}
+
+# DATA COLLECTION
+
+foreach my $lastRunningRef (@runningRefs) {
+  # zone: this needs to be done for each job we stop above, so instead of lastRunningRef we should have an array of all the old jobs
+  
+  # 19 Oct 2003 : GWA : Get more, important info about the job we stopped.
+  
+  my $classesQuery = "select fileid from " . $_JOBFILESTABLENAME . 
+                     " where jobid=" . $lastRunningRef->{'jobid'} .
+                     " and moteid=0";
+  my $classesStatement;
+  $classesStatement = $ourDB->prepare($classesQuery)
+    or die "Couldn't prepare query '$classesQuery': $DBI::errstr\n";
+  $classesStatement->execute();
+
+  # 19 Oct 2003 : GWA : Ack.  We also need the db prefix for this user.
+
+  my $userQuery = "select dbname, username, used from " . $_SESSIONTABLENAME .
+                  " as auth, " . $_JOBSTABLENAME .
+                  " as jobs" .
+                  " where jobs.id=" . $lastRunningRef->{'jobid'} .
+                  " and jobs.owner = auth.username";
+  my $userStatement;
+  $userStatement = $ourDB->prepare($userQuery)
+    or die "Couldn't prepare query '$userStatement': $DBI::errstr\n";
+  $userStatement->execute();
+  my $userRef = $userStatement->fetchrow_hashref();
+  my $userDB = $userRef->{'dbname'};
+
+  # 19 Oct 2003 : GWA : First create our temporary directory.
+
+  my $dirName = $_JOBDATAROOT . $lastRunningRef->{'jobtempdir'} . "/data";
+  mkdir($dirName)
+    or die "Couldn't create data directory\n";
+  
+  # 19 Oct 2003 : GWA : Now touch each class to get data.
+  
+  my $classesRef;
+  my $tableNameRoot = $lastRunningRef->{'dbprefix'};
+  
+  my $jobInfoQuery = "select powermanage, postprocess from " .
+                  $_JOBSTABLENAME .
+                  " where id=" . $lastRunningRef->{'jobid'};
+  my $jobInfoStatement;
+  $jobInfoStatement = $ourDB->prepare($jobInfoQuery)
+    or die "Couldn't prepare query '$userStatement': $DBI::errstr\n";
+  $jobInfoStatement->execute();
+  my $jobInfoRef = $jobInfoStatement->fetchrow_hashref();
+
+  if ($jobInfoRef->{'powermanage'}) {
+    my $powerMoveCmd = "mv $_JOBDATAROOT" . $lastRunningRef->{'jobtempdir'} .
+                       "/powerManage.log" .
+                       " $_JOBDATAROOT" . $lastRunningRef->{'jobtempdir'} .
+                       "/data/powerManage.log";
+    `$powerMoveCmd`;
+  }
+
+  if ($jobInfoRef->{'postprocess'} ne "") {
+    my $postProcessCmd = $jobInfoRef->{'postprocess'} . " " . 
+                         $userRef->{'dbname'} . "." . 
+                         $lastRunningRef->{'dbprefix'};
+    print $postProcessCmd; 
+    my $postProcessPID = fork();
+    if ($postProcessPID == 0) {
+      exec($postProcessCmd);
+    }
+  }
+
+  open(SUMMARY, ">$dirName/class.summary");
+  
+  while ($classesRef = $classesStatement->fetchrow_hashref()) {
+    open(DATA, ">$dirName/$classesRef->{'fileid'}.dat");
+    my $tableName = $tableNameRoot . "_" . $classesRef->{'fileid'};
+    print SUMMARY "Dumping field info for message class #" .
+                  $classesRef->{'fileid'} . "\n";
+    print SUMMARY `$_DATAUPDATEROOT "describe $userDB.$tableName"`;
+    print DATA `$_DATAUPDATEROOT "select * from $userDB.$tableName"`;
+    close DATA;
+  }
+
+  close SUMMARY;
+  
+  # 19 Oct 2003 : GWA : zip up everything.
+
+  my $zipFile = $_JOBDATAROOT . $lastRunningRef->{'jobtempdir'} .
+                "/data-" . $lastRunningRef->{'id'} . ".zip";
+  my $zipRootDir = "$_JOBDATAROOT$lastRunningRef->{'jobtempdir'}/data";
+  #print "$_ZIP $zipFile -j $zipRootDir $zipRootDir/*";
+  `$_ZIP $zipFile -j $zipRootDir $zipRootDir/*`; 
+  
+  # 19 Oct 2003 : GWA : Correct permissions so that the webserver can get at
+  #               stuff.
+
+  `$_CHOWN -R $_WEBUSER $_JOBDATAROOT$lastRunningRef->{'jobtempdir'}`;
+  `$_CHGRP -R $_WEBUSER $_JOBDATAROOT$lastRunningRef->{'jobtempdir'}`;
+  
+  # 07 Dec 2003 : GWA : Update jobschedule with data path.
+
+  my $updateQuery = "update " .
+                 $_JOBSCHEDULETABLENAME .
+                 " set datapath=\"" . $zipFile . "\"" .
+                 " where id=" . $lastRunningRef->{'id'};
+  my $updateStatement;
+  $updateStatement = $ourDB->prepare($updateQuery)
+    or die "Couldn't prepare query '$updateStatement': $DBI::errstr\n";
+  $updateStatement->execute();
+  
+  # 28 Oct 2003 : GWA : Update user quota.
+
+  # zone: we'll want to do this a different way when zones are used, but it's not too important
+
+  my $numMinutesFreed = $lastRunningRef->{'quotacharge'};
+  my $newUsed = $userRef->{'used'} - $numMinutesFreed;
+  
+  # 12 Dec 2003 : GWA : Not sure why this is happening, but i want to prevent
+  #               the user quota from going negative.
+  if ($newUsed < 0) {
+    $newUsed = 0;
+  }
+  my $quotaQuery = "update " . $_SESSIONTABLENAME . 
+                   " set used=" . $newUsed .
+                   " where username=\"" . $userRef->{'username'} . "\"";
+  my $quotaStatement;
+  $quotaStatement = $ourDB->prepare($quotaQuery) 
+    or die "Couldn't prepare query '$quotaStatement': $DBI::errstr\n";
+  $quotaStatement->execute();
+}
+
+if ($doStop) {
+  goto FINISH;
+}
+
+#
+# MARK MISSED JOBS
+#
+# 08 Aug 2003 : GWA : If, for some reason, we missed running a job
+#               (job-daemon.pl doesn't run or whatever) we want to mark that.
+#
+
+my $missedQuery = "select id, jobid, start, pid," .
+                  " UNIX_TIMESTAMP(start) as unixstart," .
+                  " UNIX_TIMESTAMP(end) as unixend from " . 
+                  $_JOBSCHEDULETABLENAME . 
+                  " where state=" . $_JOBPENDING . 
+                  " and end <= NOW()" .
+                  " and jobdaemon=\"" . $_JOBDAEMON . "\"";
+my $missedStatement;
+$missedStatement = $ourDB->prepare($missedQuery)
+  or die "Couldn't prepare query '$missedStatement': $DBI::errstr\n";
+$missedStatement->execute();
+
+
+# 18 Aug 2003 : GWA : Walk through all missed jobs marking them as problems.
+
+my $missedRef;
+while ($missedRef = $missedStatement->fetchrow_hashref()) {
+
+  my $updateQuery = "update " .
+                 $_JOBSCHEDULETABLENAME .
+                 " set state=" . $_JOBSTARTPROBLEM .
+                 " where id=" . $missedRef->{'id'};
+  my $updateStatement;
+  $updateStatement = $ourDB->prepare($updateQuery)
+    or die "Couldn't prepare query '$updateStatement': $DBI::errstr\n";
+  $updateStatement->execute();
+  $outputStart .= "Uh-oh: missed job $missedRef->{'jobid'}\n";
+  $oldJob = 1;
+}
+
+#
+# FIND NEW JOBS
+#
+# 03 Aug 2003 : GWA : Next we figure out if there are new jobs that need to
+#               be started.  To do this we look for jobs that are pending and
+#               should have started already.  Again, there should only be
+#               one.  Here we retrieve the information about the job from the
+#               database.  We try to reprogram the lab and update the status
+#               in the database afterwards as appropriate.
+#
+
+my $pendingQuery = "select id, jobid, start, moteprogram," . 
+                " UNIX_TIMESTAMP(start) as unixstart," .
+                " UNIX_TIMESTAMP(end) as unixend from " .
+                $_JOBSCHEDULETABLENAME .
+                " where state=" . $_JOBPENDING . 
+                " and start <= NOW()" . 
+                " and end > NOW()" .
+                " and jobdaemon=\"" . $_JOBDAEMON . "\"" .
+                " order by start";
+my $pendingStatement;
+$pendingStatement = $ourDB->prepare($pendingQuery)
+  or die "Couldn't prepare query '$pendingStatement': $DBI::errstr\n";
+$pendingStatement->execute();
+
+my $pendingCount = $pendingStatement->rows;
+my $pendingRef;
+
+# zone: this marking of problems isn't the way to go with zones
+
+#if ($pendingCount > 1) {
+#  $outputStart .= "More than one job found pending.  Marking problems.";
+#}
+
+# 18 Aug 2003 : GWA : Walk through all pending jobs up until the last one,
+#               marking them as problems.
+#for (my $index = 0; $index < $pendingCount - 1; $index++) {
+  
+#  $pendingRef = $pendingStatement->fetchrow_hashref();
+
+  # 18 Aug 2003 : GWA : Right now we KNOW that any extra pending jobs are
+  #               problems, so mark them that way.
+
+#  my $updateQuery = "update " .
+#                 $_JOBSCHEDULETABLENAME .
+#                 " set state=" . $_JOBSTARTPROBLEM;
+#                 " where id=" . $pendingRef->{'id'};
+#  my $updateStatement;
+#  $updateStatement = $ourDB->prepare($updateQuery)
+#    or die "Couldn't prepare query '$updateQuery': $DBI::errstr\n";
+#  $updateStatement->execute();
+#}
+
+#
+# 30 Apr 2004 : GWA : Adding daemon support.  We try to grab an appropriate
+#               daemon job in cases where nothing is actually running.
+
+my @jobArray; # array of ID and jobID pairs
+my $isDaemonJob = 0;
+
+# 30 Apr 2004 : GWA : <Sigh>.  We've got to do this up here as well, just to
+#               see if we need to shut the daemon down.
+
+while ($pendingRef = $pendingStatement->fetchrow_hashref()) {
+  push(@jobArray, {'id'          => $pendingRef->{'id'},
+                   'jobid'       => $pendingRef->{'jobid'},
+                   'moteprogram' => $pendingRef->{'moteprogram'}});
+}
+
+
+my $blahQuery = "select id from " .
+                $_JOBSCHEDULETABLENAME .
+                " where state=" . $_JOBRUNNING;
+my $blahStatement;
+$blahStatement = $ourDB->prepare($blahQuery)
+  or die "Couldn't prepare query '$blahStatement': $DBI::errstr\n";
+$blahStatement->execute();
+
+if ($blahStatement->rows == 0 && $pendingCount == 0 && $_DAEMONSUPPORT != 0) {
+  my $selectDaemonQuery = "select id, croncount from " . $_JOBSTABLENAME . 
+                          " where cronjob=1 and" .
+                          " (((unix_timestamp(lastran)) +" .
+                          " (60 * cronfreq)) < unix_timestamp(NOW())) order by" .
+                          " croncount desc limit 1";
+  my $selectDaemonStatement;
+  $selectDaemonStatement = $ourDB->prepare($selectDaemonQuery)
+    or die "Couldn't prepare query '$selectDaemonQuery': $DBI::errstr\n";
+  $selectDaemonStatement->execute();
+  if ($selectDaemonStatement->rows) {
+    my $selectDaemonRef = $selectDaemonStatement->fetchrow_hashref();
+    push(@jobArray, {'id'    => $selectDaemonRef->{'croncount'},
+                     'jobid' => $selectDaemonRef->{'id'}});
+    $isDaemonJob = 1;
+  }
+} 
+
+#
+# 03 Aug 2003 : GWA : The normal path.  First retrieve info and try
+#               to run the job
+
+# zone: this should more or less be done in a loop for each pending job
+
+foreach my $currentJob (@jobArray) {
+  my $jobID = $currentJob->{'id'};
+  my $jobJobID = $currentJob->{'jobid'};
+  $newJob = 1;
+  
+  # 31 Aug 2003 : GWA : We need some basic information about the job, like
+  #               the owner.
+
+  my $basicQuery = "select owner, name, powermanage, duringrun " .
+                   "from " . $_JOBSTABLENAME .  " where id=" .  $jobJobID;
+  my $basicStatement;
+  $basicStatement = $ourDB->prepare($basicQuery)
+    or die "Couldn't prepare query '$basicQuery': $DBI::errstr\n";
+  $basicStatement->execute();
+  my $basicRef = $basicStatement->fetchrow_hashref();
+  $jobOwner = $basicRef->{'owner'};
+
+  #
+  # 10 Oct 2003 : GWA : We need even more information.
+  #
+
+  my $moreBasicQuery = "select dbname from " . $_SESSIONTABLENAME .
+                       " where username=\"" . $jobOwner . "\""; 
+  my $moreBasicStatement;
+  $moreBasicStatement = $ourDB->prepare($moreBasicQuery)
+    or die "Couldn't prepare `$moreBasicStatement': $DBI::errstr\n";
+  $moreBasicStatement->execute();
+  my $moreBasicRef = $moreBasicStatement->fetchrow_hashref();
+  my $databaseName = $moreBasicRef->{'dbname'};
+
+  #
+  # 09 Mar 2004 : GWA : Hacking this up to set up seperate serial forwarders
+  #               for each mote.
+
+  my @currentMoteProg = ();
+  if ($isDaemonJob == 0) {
+    # zone: note that currentJob->{'moteprogram'} is only defined for non-daemons
+    my @moteProgTemp = split(/\|/, $currentJob->{'moteprogram'});
+    foreach my $moteProgEntry (@moteProgTemp) {
+      my @tmp = split(/,/, $moteProgEntry);
+      $currentMoteProg[$tmp[0]] = $tmp[1];
+    }
+  } else {
+    # zone: build a currentMoteProg array for daemon jobs so we can just use that from now on
+
+    # 31 AUG 2004: swies: use only active motes
+    #my $progQuery = "select moteid, fileid from " . $_JOBFILESTABLENAME .
+    #                " where jobid=" . $jobJobID;
+    my $progQuery = "select jobfiles.moteid, fileid from " .
+                    $_JOBFILESTABLENAME . " as jobfiles, " .
+                    $_MOTEINFOTABLENAME . " as motes" .
+                    " where motes.moteid = jobfiles.moteid and" .
+                    " active = 1 and" .
+                    " jobid = " . $jobJobID;
+    my $progStatement;
+    $progStatement = $ourDB->prepare($progQuery)
+      or die "Couldn't prepare query '$progStatement': $DBI::errstr\n";
+    $progStatement->execute();
+    while (my $progRef = $progStatement->fetchrow_hashref()) {
+      $currentMoteProg[$progRef->{'moteid'}] = $progRef->{'fileid'};
+    }
+  }
+
+  my $moteBasicQuery = "select moteid, ip_addr, comm_port, sf_pid from " .
+                       $_MOTEINFOTABLENAME .
+                       " where active=1";
+  my $moteBasicStatement;
+  $moteBasicStatement = $ourDB->prepare($moteBasicQuery)
+    or die "Couldn't prepare query '$moteBasicQuery': $DBI::errstr\n";
+  $moteBasicStatement->execute();
+
+  my $sfPID;
+  while (my $moteBasicRef = $moteBasicStatement->fetchrow_hashref()) {
+    # zone: this should be done only for the current job's motes
+    if (defined($currentMoteProg[$moteBasicRef->{'moteid'}])) {
+      my $sfCommand = "$_EXTERNALSF -comm network\@$moteBasicRef->{'ip_addr'}:"
+                      . "$_MOTECOMMPORT -port $moteBasicRef->{'comm_port'}" .
+                      " -no-gui -quiet";
+      #print $sfCommand . "\n";
+    
+      $sfPID = fork();
+      if ($sfPID == 0) {
+        exec("exec $sfCommand");
+      }
+      my $updateMotesQuery = "update motes set sf_pid=" . $sfPID .
+                             " where ip_addr=\"" . $moteBasicRef->{'ip_addr'} .
+                             "\"";
+      my $updateMoteStatement;
+      $updateMoteStatement = $ourDB->prepare($updateMotesQuery);
+      $updateMoteStatement->execute();
+    }
+  }
+  
+  # 03 Aug 2003 : GWA : The first thing is probably to set up the DBlogger.
+  #               To do this we need to retrieve the class files that are
+  #               used for messaging purposes and all of the mote
+  #               addresses.
+
+  # 03 Aug 2003 : GWA : Holds an array of hashes which include paths to pass
+  #               to dblogger.
+
+  my $classes;
+  my $mkdirDirRoot;
+  my $classPaths;
+
+  # 03 Aug 2003 : GWA : For printing updates.
+  my $classStringUpdate = "";
+  my $programStringUpdate = "";
+
+  # 03 Aug 2003 : GWA : For holding mote info.  Indexed by moteID.
+  my @moteProgram;
+  my @moteLocation;
+
+  # 19 Aug 2003 : GWA : Create temporary directory where we will store all
+  #               of our important files.
+  #
+  # 31 Aug 2003 : GWA : We're going to make this permanent instead, just in
+  #               case we want to examine these files later.
+ 
+  my $tempDirUserPath;
+  if (!$isDaemonJob) {
+    $tempDirUserPath =$jobOwner . "/jobs/job" . 
+                      $jobJobID .  "_" . $jobID;
+  } else {
+    $tempDirUserPath =$jobOwner . "/jobs/job" . 
+                      $jobJobID .  "_Daemon_" . $jobID;
+  }
+  my $tempDirPath = $_USERROOT . $tempDirUserPath;
+  $_AVROBJCOPYLOGFILE = "$tempDirPath/avr-objcopy.log";
+  $_REMOTEUISPLOGFILE = "$tempDirPath/remote-uisp.log";
+  $_DBLOGGERLOGFILE = "$tempDirPath/dblogger.log";
+  $_POWERMANAGEFILE = "$tempDirPath/powerManage.log";
+
+  my $tempDir = mkdir($tempDirPath)
+    or die "Couldn't create temp directory $tempDirPath\n";
+
+  # zone: find the DBLogger class files
+  my $classQuery = "select files.path, files.user, files.type, files.id," .
+                " jobfiles.moteid from " . $_FILESTABLENAME .
+                ", " . $_JOBFILESTABLENAME . 
+                " where jobfiles.jobid=" . $jobJobID .
+                " and jobfiles.fileid = files.id" .
+                " and jobfiles.moteid = 0";
+  my $classStatement;
+  $classStatement = $ourDB->prepare($classQuery)
+    or die "Couldn't prepare query '$classStatement': $DBI::errstr\n";
+  $classStatement->execute();
+  while (my $classRef = $classStatement->fetchrow_hashref()) {
+
+    # 03 Aug 2003 : GWA : Moteid == 0 means it should be a class file for
+    #               messaging.  First, sanity checks.
+
+    $classRef->{type} == "class" 
+      or die "Wrong file type for message class!";
+
+    # 19 Aug 2003 : GWA : We need to figure out the actual correct name of
+    #               the java class that we are trying to use.  To do this we
+    #               run javaw on it and check the error message.
+     
+    my $javawError = `$_JAVAW $classRef->{path} 2>&1`;
+    $javawError =~ /wrong name: (.*)\)/;
+    my $javaClassName = $1;
+    $javaClassName =~ s/\//\./g;
+
+    # 03 Aug 2003 : GWA : The string $classes will hold a space seperated
+    #               list of all the message class names to register.  The
+    #               string $classPaths will hold a space seperated list of
+    #               all the paths to the various classes, which we use to
+    #               pass to jar.
+
+    $classes .= "$javaClassName $classRef->{'id'} ";
+    my $javaClassPath = $javaClassName;
+    $javaClassName =~ s/\./\//g;
+    my @javaClassNameArray = split("/", $javaClassName);
+    pop(@javaClassNameArray);
+    my $javaFilePath = join("/", @javaClassNameArray);
+    my $javaDirRoot = shift(@javaClassNameArray);
+    `mkdir -p $tempDirPath/jar/$javaFilePath`;
+    `cp $classRef->{'path'} $tempDirPath/jar/$javaClassName.class`;
+      
+    $classPaths .= "-C $tempDirPath/jar/ $javaClassName.class ";
+    $classStringUpdate .= "Added message class " . 
+                          $javaClassName . " with ID " .
+                          $classRef->{'id'} . "\n";
+  }
+
+  # zone: now we need to step through currentMoteProg, look up the files and get them ready for each mote
+
+  my @pathCache;
+  for (my $moteid = 1; $moteid < $#currentMoteProg; $moteid++) {
+    my $fileid;
+
+    if (defined($currentMoteProg[$moteid])) {
+      $fileid = $currentMoteProg[$moteid];
+    } else {
+      next;
+    }
+
+    if (!defined($pathCache[$fileid])) {
+      # zone: look it up in the DB
+      my $pathQuery = "select path from " . $_FILESTABLENAME .
+                      " where id=" . $fileid;
+      my $pathStatement;
+      $pathStatement = $ourDB->prepare($pathQuery)
+        or die "Couldn't prepare query '$pathStatement': $DBI::errstr\n";
+      $pathStatement->execute();
+      my $pathRef = $pathStatement->fetchrow_hashref();
+      $pathCache[$fileid] = $pathRef->{'path'};
+    }
+
+    # 31 Aug 2003 : GWA : This is somewhat inefficient.  We do the
+    #               conversion from .exe -> .srec here, and then change the
+    #               moteID as well on the way to the temp directory.  It
+    #               would be smarter to do all of the .exe -> .srec at once
+    #               and then work from there, but oh well.
+     
+    my $moteRoot = $tempDirPath . "/" . $moteid;
+    my $moteEXE = $moteRoot . ".exe";
+    my $moteSREC = $moteRoot . ".srec";
+    $moteEXE = "\"" . $moteEXE . "\"";
+    $moteSREC = "\"" . $moteSREC . "\"";
+
+    # 31 Aug 2003 : GWA : Some programs don't have a address to change.  In
+    #               that case, we use the avr-objcopy to move the file.
+
+    # zone: we'll probably need some sort of SETFREQUENCY program to run here FIXME
+     
+    my $setMoteID = "$_SETMOTEID --exe \"" . $pathCache[$fileid] . "\"" .
+                    " $moteEXE $moteid";
+    my $avrRoot = "$_AVROBJCOPY --output-target=srec";
+    #print "$setMoteID\n";
+    my $output = `$setMoteID`; # 2> /dev/null`;
+    #print "$output\n";
+    if ($output ne "") {
+      $avrRoot .= " \"" . $pathCache[$fileid] . "\" $moteSREC";
+    } else {
+      $avrRoot .= " $moteEXE $moteSREC";
+    }
+    
+    # 31 Aug 2003 : GWA : Actually run the command and log output.
+    #print "$avrRoot\n";
+    print `$avrRoot 2>&1 >> $_AVROBJCOPYLOGFILE`;
+
+    $moteProgram[$moteid] = $moteSREC;
+    $programStringUpdate .= "Added program " .
+                            $pathCache[$fileid] . 
+                            " for mote #" . 
+                            $moteid . "\n";
+  }
+
+  #$outputStart .= $classStringUpdate . $programStringUpdate;
+
+  # 01 Sep 2003 : GWA : Time to get dblogger up and running.  First create
+  #               the jar file.
+  # 10 Dec 2003 : GWA : Trying to move this above the reprogramming to catch
+  #               the begging of each job.
+
+  # 10 Dec 2003 : GWA : Moved this up here to do once over to create the
+  #               dblogger connect string.
+
+  # zone: this is fine since it checks for an entry in moteProgram before doing things
+
+  my $moteInfoQuery = "select moteid, comm_port from " . $_MOTEINFOTABLENAME .
+                      " where active=1";
+  my $moteInfoStatement;
+  $moteInfoStatement = $ourDB->prepare($moteInfoQuery) 
+    or die "Couldn't prepare query `$moteInfoStatement': $DBI::errstr\n";
+  $moteInfoStatement->execute();
+  
+  my $dbLoggerConnectString;
+  while (my $moteInfoRef = $moteInfoStatement->fetchrow_hashref()) {
+    if (exists($moteProgram[$moteInfoRef->{'moteid'}])) {
+      $dbLoggerConnectString .= "$_SFHOSTIPADDR:" . 
+                                "$moteInfoRef->{'comm_port'}" .
+                                "::$moteInfoRef->{'moteid'} ";
+    }
+  }
+
+  my $jarCommand = "$_JAR cvf $tempDirPath/classes.jar " .
+                   "$classPaths";
+  #print $jarCommand . "\n";
+  #$outputStart .=  `$jarCommand 2>&1`;
+  `$jarCommand 2>&1`;
+  
+  # 02 Sep 2003 : GWA : Now fork off a thread to execute the command.
+  
+  my $tablePrefix;
+  if (!$isDaemonJob) {
+    $tablePrefix = $basicRef->{'name'} . "_" . $jobID;
+  } else {
+    $tablePrefix = $basicRef->{'name'} . "_Daemon_" . $jobID;
+  }
+  my $dbLoggerCommand = "$_DBLOGGER" .
+                        " --dbUser $_DBDUMPUSER" .
+                        " --dbPassword $_DBDUMPPASSWORD" .
+                        " --dbNoTimestamp" .
+                        " --dbTablePrefix $tablePrefix" .
+                        " --dbDatabase $databaseName" .
+                        " --redirect $_DBLOGGERLOGFILE" .
+                        " --verbose" .
+                        " --classLocation $tempDirPath/classes.jar" .
+                        " --classes $classes" . 
+                        " --connect $dbLoggerConnectString";
+  print $dbLoggerCommand . "\n";
+  my $dbLoggerPID = fork();
+  if ($dbLoggerPID == 0) {
+    
+    # 02 Sep 2003 : GWA : Little hack here suggested by david holland to make
+    #               sure that we get the right PID.
+    
+    exec("exec $dbLoggerCommand");
+  }
+    
+  # 03 Aug 2003 : GWA : Here we need to retrieve mote information from
+  #               the mote database.
+  #
+  # 31 Aug 2003 : GWA : Now we go looping through any info in the mote
+  #               database reprogramming any motes that we actually have info
+  #               for.
+  #
+  # 02 Sep 2003 : GWA : Changed to do the reprogramming via threads,
+  #               hopefully cutting down on the reprogramming time once the
+  #               lab gets large.
+
+  my $moteInfoQuery = "select ip_addr, moteid from " . $_MOTEINFOTABLENAME .
+                      " where active=1";
+  my $moteInfoStatement;
+  $moteInfoStatement = $ourDB->prepare($moteInfoQuery) 
+    or die "Couldn't prepare query `$moteInfoStatement': $DBI::errstr\n";
+  $moteInfoStatement->execute();
+  
+  # 30 Jan 2004 : GWA : Adding power manangement.  We'll start this up before
+  #               the motes are programmed.  Hence it will show the
+  #               reprogrammming cost, but that's a good way to mark the
+  #               beginning of execution.
+
+  # 30 Jan 2004 : GWA : Eventually we're going to have options here, but for
+  #               now only one.
+  
+  # 30 Jan 2004 : GWA : Moved below reprogramming.
+  
+  # 03 Mar 2004 : GWA : Moved back above reprogramming.
+
+  # zone: not entirely sure what this means for zone usage FIXME
+
+  my $powerManagePID = 0;
+  if ($_HAVEPOWERCOLLECT && 
+      $basicRef->{'powermanage'} != 0) {
+    my $powerManageCommand = "$_POWERCOLLECTCMD >> $_POWERMANAGEFILE";
+    my $powerIDString = "# Data from job " . $jobJobID .
+                        " run on " . localtime() . "\n";
+    open(POWERMANAGE, ">$_POWERMANAGEFILE");
+    print POWERMANAGE $powerIDString;
+    close(POWERMANAGE);
+    #print $powerManageCommand;
+    $powerManagePID = fork();
+    if ($powerManagePID == 0) {
+      exec("exec $powerManageCommand");
+    }
+  }
+
+  my @threadArray;
+  while (my $moteInfoRef = $moteInfoStatement->fetchrow_hashref()) {
+
+    if (!exists($moteProgram[$moteInfoRef->{'moteid'}])) {
+      next;
+    }
+    #print "Reprogramming mote " . $moteInfoRef->{'moteid'} . "\n";
+    my $t = new Thread (\&doProgram, 
+                        ($moteInfoRef->{'moteid'},
+                         $moteProgram[$moteInfoRef->{'moteid'}],
+                         $moteInfoRef->{'ip_addr'}));
+    push(@threadArray, $t);
+  }
+  
+  my $programmingOutput = "Started programming motes...\n";
+  foreach my $currentThread (@threadArray) {
+    $programmingOutput .= $currentThread->join;
+  }
+  $outputStart .= $programmingOutput;
+  
+  # 30 Apr 2004 : GWA : Adding support for during-job processes
+
+  my $duringRunPID = 0;
+  if ($basicRef->{'duringrun'} ne "") {
+    $duringRunPID = fork();
+    if ($duringRunPID == 0) {
+      exec("exec " . $basicRef->{'duringrun'} . " > /dev/null 2> /dev/null");
+    }
+    print "duringrun = " . $basicRef->{'duringrun'} . " > /dev/null 2> /dev/null
+\n";
+  } 
+
+  # 02 Sep 2003 : GWA : We've set up everything that we can.  Now update the
+  #               database.
+
+  if (!$isDaemonJob) {
+    my $updateQuery = "update " .
+                      $_JOBSCHEDULETABLENAME . 
+                      " set state=" . $_JOBRUNNING . 
+                      ", realstart=NOW()" .
+                      ", pid=" . $dbLoggerPID . 
+                      ", powerpid=" . $powerManagePID .
+                      ", jobtempdir=\"" . $tempDirUserPath . "\"" .
+                      ", dbprefix=\"" . $tablePrefix . "\"" .
+                      " where id=" . $jobID;
+    my $updateStatement; 
+    $updateStatement = $ourDB->prepare($updateQuery) 
+      or die "Couldn't prepare query '$updateStatement': $DBI::errstr\n";
+    $updateStatement->execute();
+    if ($duringRunPID != 0) {
+      my $updateQuery = "update " .
+                        $_JOBSTABLENAME . 
+                        " set duringrunpid=" . $duringRunPID .
+                        " where id=" . $jobJobID;
+      my $updateStatement; 
+      $updateStatement = $ourDB->prepare($updateQuery) 
+        or die "Couldn't prepare query '$updateStatement': $DBI::errstr\n";
+      $updateStatement->execute();
+    }
+  } else {
+    my $updateQuery = "update " .
+                      $_JOBSTABLENAME . 
+                      " set lastran=NOW()" .
+                      ", croncount=(croncount + 1)" .
+                      ", cronactive=1" .
+                      ", duringrunpid=" . $duringRunPID .
+                      ", cacheddb=\"" . $moreBasicRef->{'dbname'} . "." .
+                                        $tablePrefix . "\"" . 
+                      ", dbloggerpid=" . $dbLoggerPID .
+                      " where id=" . $jobJobID;
+    my $updateStatement; 
+    $updateStatement = $ourDB->prepare($updateQuery) 
+      or die "Couldn't prepare query '$updateStatement': $DBI::errstr\n";
+    $updateStatement->execute();
+  }
+
+  # 18 Oct 2003 : GWA : Kind of fixed... still not sure this is correct
+  #               though.
+
+  `$_CHOWN -R $_WEBUSER $tempDirPath`;
+  `$_CHGRP -R $_WEBUSER $tempDirPath`;
+  
+  $outputStart .= "\nStarted new job with jobID " . 
+                  $jobJobID . "\n";
+}
+
+FINISH:
+
+# 03 Nov 2003 : GWA : Added something to clear up lab after old jobs run if
+#               there is nothing else running.
+
+# 03 Nov 2003 : GWA : Bah... we need to find _any_ jobs about to be run.
+
+my $pendingQuery = "select id from " .
+                $_JOBSCHEDULETABLENAME .
+                " where state=" . $_JOBRUNNING .
+                " order by start";
+my $pendingStatement;
+$pendingStatement = $ourDB->prepare($pendingQuery)
+  or die "Couldn't prepare query '$pendingStatement': $DBI::errstr\n";
+$pendingStatement->execute();
+
+if ($oldJob == 1 && $newJob == 0 && $pendingStatement->rows == 0) {
+  my $moteInfoQuery = "select ip_addr, moteid from " . $_MOTEINFOTABLENAME .
+                      " where active=1";
+  my $moteInfoStatement;
+  $moteInfoStatement = $ourDB->prepare($moteInfoQuery) 
+    or die "Couldn't prepare query `$moteInfoStatement': $DBI::errstr\n";
+  $moteInfoStatement->execute();
+  
+  my @threadArray;
+  my $programmingOutput;
+  while (my $moteInfoRef = $moteInfoStatement->fetchrow_hashref()) {
+
+    my $t = new Thread (\&doProgram, 
+                        ($moteInfoRef->{'moteid'},
+                         "",
+                         $moteInfoRef->{'ip_addr'}));
+    push(@threadArray, $t);
+  }
+  foreach my $currentThread (@threadArray) {
+    $programmingOutput .= $currentThread->join;
+  }
+  print $programmingOutput;
+}
+
+if ($oldJob || $newJob) {
+  my $diff = time() - $timeStart;
+  $outputStart .= "jobs-daemon finished.  operation took " . $diff .
+                  " seconds\n";
+  print $outputStart;
+}
+
+exit(0);
+
+sub doProgram {
+  my $moteID = shift;
+  my $moteProgram = shift;
+  my $moteAddress = shift;
+  my $moteOutput = "Reprogramming $moteID\n";
+  
+  my $runRoot = "$_REMOTEUISP -dprog=stk500" .
+                " -dhost=" . $moteAddress .
+                " -dport=" . $_MOTEREPROPORT .
+                " -dpart=ATmega128";
+  if ($moteProgram ne "") {
+    $moteOutput .= `$runRoot --erase 2>&1`;
+  } else {
+    #print "$runRoot --upload if=blank.srec 2>&1\n";
+    $moteOutput .= `$runRoot --upload if=blank.srec 2>&1`;
+  }
+  if ($moteProgram ne "") {
+    #print "$runRoot --upload if=$moteProgram 1>&1\n";
+    $moteOutput .= `$runRoot --upload if=$moteProgram 2>&1`;
+  }
+  return $moteOutput;
+}
