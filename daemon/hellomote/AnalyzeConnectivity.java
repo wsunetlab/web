@@ -41,7 +41,7 @@ public class AnalyzeConnectivity {
 		Calendar currentDate = Calendar.getInstance();
   		SimpleDateFormat formatter = new SimpleDateFormat("MM_dd_yyyy_HH_mm_ss");
   		String dateNow = formatter.format(currentDate.getTime());
-  		System.out.println("Date :  " + dateNow);
+ // 		System.out.println("Date :  " + dateNow);
 		return dateNow;
 	}
 
@@ -50,55 +50,82 @@ public class AnalyzeConnectivity {
 		StringTokenizer stringTokenizer;
 		String tokenArray[] = null;
 		int INF_VALUE = 9999999;
+		List moteIdList;
 	//	int noOfMotes = 3;
 	try{
-	Connection con = getJDBCConnection();
-        moteDataStatement = con.prepareStatement("select moteid,ip_addr from auth.motes 	where active='1'");
-        ResultSet rs = moteDataStatement.executeQuery();
+		Connection con = getJDBCConnection();
+        	moteDataStatement = con.prepareStatement("select moteid,ip_addr from auth.motes where active='1'");
+        	ResultSet rs = moteDataStatement.executeQuery();
 
-        List moteIdList = new ArrayList();
+        	moteIdList = new ArrayList();
 	
-        while(rs.next()){
-                String moteId = rs.getString("moteid");
-                moteIdList.add(moteId);               
-        }
+        	while(rs.next()){
+                	String moteId = rs.getString("moteid");
+                	moteIdList.add(moteId);               
+        	}
 
 		int noOfMotes = (int) moteIdList.size();
 		int noOfFiles = noOfMotes;
+//		System.out.println("No of Motes: "+noOfMotes + " No of Files: " + noOfFiles);
 
-		int maxMsgFromSToR[][] = new int[noOfMotes][noOfMotes];
-		int minMsgFromSToR[][] = new int[noOfMotes][noOfMotes];
-		int totalMsgFromSToR[][] = new int[noOfMotes][noOfMotes];
+		int maxMsgFromSToR[][] = new int[10][10];
+
+	//	int maxMsgFromSToR[][] = new int[noOfMotes][noOfMotes];
+		int minMsgFromSToR[][] = new int[10][10];
+
+	//	int minMsgFromSToR[][] = new int[noOfMotes][noOfMotes];
+		int totalMsgFromSToR[][] = new int[10][10];
+
+	//	int totalMsgFromSToR[][] = new int[noOfMotes][noOfMotes];
 		double prr[][] = new double[noOfMotes][noOfMotes];
 
 		for (int i = 0; i < noOfMotes; i++) {
 			for (int j = 0; j < noOfMotes; j++) {
+
 				if (j == i)
 					continue;
 				else {
-					minMsgFromSToR[i][j] = INF_VALUE;
+		int arrI = Integer.parseInt(moteIdList.get(i).toString());
+		int arrJ = Integer.parseInt(moteIdList.get(j).toString());
+
+		//minMsgFromSToR[i][j] = INF_VALUE;
+		minMsgFromSToR[arrI][arrJ] = INF_VALUE;
+					
+ // minMsgFromSToR[Integer.parseInt(moteIdList.get(i).toString())][Integer.parseInt(moteIdList.get(j).toString())] = INF_VALUE;
 				}
+				
 			}
 		}
 	
 	moteCreateTableStat = con.createStatement();
 	String currentDate = getDateTime();
+
 	moteCreateTableStat.executeUpdate("create table auth.data_"+currentDate+"(id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), send_addr varchar(100), msg_counter varchar(100), rec_addr varchar(100), time_Stamp DATETIME)");
 
-	for (int currentFileNo = 0; currentFileNo < noOfFiles; currentFileNo++) 		{
+	int l=0;
+
+
+
 	
-//	String fileName = "/opt/tinyos-2.x/apps/RadioCountToLeds/USB".concat(Integer.toString(currentFileNo).concat("Data.txt"));
-// String fileName = "/var/www/web/html/USB".concat(Integer.toString(currentFileNo).concat("Data.txt"));
-String fileName = "/var/www/web/daemon/hellomote/USB".concat(Integer.toString(currentFileNo).concat("Data.txt"));
+	for (l = 0; l < noOfFiles; l++){
+		System.out.println("Current Fl No:"+ l);	
+
+// Modified by Jenis & Date: Feb 13 2013: Used mote id list to identify file .
+	System.out.println("Moteid:"+moteIdList.get(l).toString());
+	String fileName = "/var/www/web/daemon/hellomote/USB".concat((moteIdList.get(l).toString()).concat("Data.txt"));
+
+	System.out.println("File name: " + fileName);
+
 	FileInputStream fstream = new FileInputStream(fileName);
 	DataInputStream in = new DataInputStream(fstream);
 	BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
 	List<String[]> tokenList = new ArrayList<String[]>();
 	
 	while ((strLine = br.readLine()) != null) {
-		
+		System.out.println("cmg in loop to read the data: "+strLine);	
 		stringTokenizer = new StringTokenizer(strLine);
-		
+		System.out.println("StringTokenizer:"+stringTokenizer);
 		int i = 0;
 		
 		tokenArray = new String[12];
@@ -106,24 +133,34 @@ String fileName = "/var/www/web/daemon/hellomote/USB".concat(Integer.toString(cu
 		while (stringTokenizer.hasMoreElements()) {
 			tokenArray[i] = (String) stringTokenizer.nextElement();
 			i++;
+		//	System.out.println("Tokens:"+tokenArray[i]);
 		}
 
 		String msg_hex = tokenArray[8].concat(tokenArray[9]);
 		int msg_decimal = Integer.parseInt(msg_hex, 16);
 		int receiver_node = Integer.parseInt(tokenArray[4]);
 		int sender_node = Integer.parseInt(tokenArray[tokenArray.length - 1]);
-		
+
+		System.out.println("Msg Decimal:"+msg_decimal);
+		System.out.println("Sender Node:"+sender_node);
+		System.out.println("Receiver node:"+receiver_node);
+
 		moteCreateTableStat.executeUpdate("insert into auth.data_"+currentDate+"(send_addr,msg_counter,rec_addr,time_Stamp) values ("+Integer.toString(sender_node)+","+Integer.toString(msg_decimal)+","+Integer.toString(receiver_node)+","+ "NOW())");
+
 
 		totalMsgFromSToR[receiver_node][sender_node]++;
 
-		if (msg_decimal > maxMsgFromSToR[receiver_node][sender_node])				maxMsgFromSToR[receiver_node][sender_node] = msg_decimal;
+		if (msg_decimal > maxMsgFromSToR[receiver_node][sender_node]){				
+			maxMsgFromSToR[receiver_node][sender_node] = msg_decimal;
+		}
 		
-		if (msg_decimal < minMsgFromSToR[receiver_node][sender_node])
-		minMsgFromSToR[receiver_node][sender_node] = msg_decimal;
+		if (msg_decimal < minMsgFromSToR[receiver_node][sender_node]){
+			minMsgFromSToR[receiver_node][sender_node] = msg_decimal;
+		}
 
 		tokenList.add(tokenArray);
 	}
+	System.out.println("Current l:"+l);
 
 	in.close();
 }
@@ -137,21 +174,27 @@ String fileName = "/var/www/web/daemon/hellomote/USB".concat(Integer.toString(cu
 			if (j == i)
 			continue;
 			else {
-			prr[i][j] = (double) totalMsgFromSToR[i][j]/ (maxMsgFromSToR[i][j] - minMsgFromSToR[i][j] + 1)* 100;
+		int moteI = Integer.parseInt(moteIdList.get(i).toString());	
+		int moteJ = Integer.parseInt(moteIdList.get(j).toString());
 
-			 linkQualityTableStat.executeUpdate("insert into auth.linkQuality"+"(send_addr,PRR,rec_addr) values ("+Integer.toString(i)+","+prr[i][j]+","+Integer.toString(j)+")");
+//			prr[i][j] = (double) totalMsgFromSToR[i][j]/ (maxMsgFromSToR[i][j] - minMsgFromSToR[i][j] + 1)* 100;
 
-			System.out.println("Sender: "+ i+ " Receiver: "
-					+ j+ " Actual Number of Msg Received: "
-					+ totalMsgFromSToR[i][j]
+			prr[i][j] = (double) totalMsgFromSToR[moteI][moteJ]/ (maxMsgFromSToR[moteI][moteJ] - minMsgFromSToR[moteI][moteJ] + 1)* 100;
+
+//			 linkQualityTableStat.executeUpdate("insert into auth.linkQuality"+"(send_addr,PRR,rec_addr) values ("+Integer.toString(i)+","+prr[i][j]+","+Integer.toString(j)+")");
+
+			 linkQualityTableStat.executeUpdate("insert into auth.linkQuality"+"(send_addr,PRR,rec_addr) values ("+Integer.toString(moteI)+","+prr[i][j]+","+Integer.toString(moteJ)+")");
+			System.out.println("Sender: "+ moteI+ " Receiver: "
+					+ moteJ+ " Actual Number of Msg Received: "
+					+ totalMsgFromSToR[moteI][moteJ]
 					+ " Expected Number of Msg Received: "
-					+ (maxMsgFromSToR[i][j]
-					- minMsgFromSToR[i][j] + 1)
+					+ (maxMsgFromSToR[moteI][moteJ]
+					- minMsgFromSToR[moteI][moteJ] + 1)
 					+ " Packet reception Ratio: "
 					+ prr[i][j] + "%");
 					}
 				}
-			}
+			} 
 	} catch (Exception e) {
 			System.err.println("Error: " + e);
 	}
