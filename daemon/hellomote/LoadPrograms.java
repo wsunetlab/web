@@ -41,15 +41,18 @@ public class LoadPrograms {
 	public static void main(String[] args) {
 
 		String s, s1;
+		final String CFLAGS = "-DCC2420_DEF_RFPOWER=";
 
 	try {
+/*
  	Process userName = Runtime.getRuntime().exec(new String[] {"who", "am", "i"});
 	BufferedReader userInput = new BufferedReader(new InputStreamReader(userName.getInputStream()));
 
-while ((s = userInput.readLine()) != null) {
+	while ((s = userInput.readLine()) != null) {
               System.out.println("username:"+s);
         }
-System.out.println("changes accepted");
+*/
+	System.out.println("********Program Starts******");
 	File nullProgDir = new File("/opt/tinyos-2.x/apps/Null");
 	File moteProgDir = new File("/opt/tinyos-2.x/apps/RadioCountToLeds/");
 //	File apacheHtmlDir = new File("/var/www/web/html/");
@@ -75,11 +78,17 @@ System.out.println("changes accepted");
 	Process nullProgProcess = null, readDataProcess = null, eraseProgProcess= null;
 
 	for (int i = 0; i < noOfMotes; i++) {
+	/**
+	* Install Null Program 
+	**/
 	String nullCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
 
 	nullProgProcess = Runtime.getRuntime().exec(nullCommand, null,
 						nullProgDir);
-	
+	/**
+        * Install Actual Program 
+        **/
+
 	String moteCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
 
 	moteProgProcess = Runtime.getRuntime().exec(moteCommand, null,
@@ -111,7 +120,7 @@ System.out.println("changes accepted");
 	
 //	readDataProcess = Runtime.getRuntime().exec(gatherCommand, null,moteProgDir);
 //File apacheHtmlDir = new File("/var/www/web/html/");
-File apacheHtmlDir = new File("/var/www/web/daemon/hellomote/");
+	File apacheHtmlDir = new File("/var/www/web/daemon/hellomote/");
  	readDataProcess = Runtime.getRuntime().exec(gatherCommand, null,apacheHtmlDir);
 
 
