@@ -1110,15 +1110,19 @@ for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {
   # parse edges and nodes (port from java program)
   # for each node: run the following on node name and connected edges
   #   (disregard other constructs for now)
+  # Topology Table : Edges - (Starting Edge, End Edge, LinkQuality) ; Nodes - (Starting Node, angle, TRansmission Power, No of antenna, Antenna is on or of ( 15 means 1111 in binary))
+
 
   my $topologyId;
 
   my $topologyIdQuery = "select topologyId from " . $_JOBSCHEDULETABLENAME . # get topologyId associated with job
                       " where id=" . $jobID; # unique id
   my $topologyIdStatement;
+  
   $topologyIdStatement = $ourDB->prepare($topologyIdQuery)
     or die "Couldn't prepare query `$topologyIdStatement': $DBI::errstr\n";
   $topologyIdStatement->execute();
+  
   if (my $topologyIdRef = $topologyIdStatement->fetchrow_hashref()) {
     $topologyId = $topologyIdRef->{'topologyId'}; # assign to topologyId (might be null)
   }
@@ -1129,16 +1133,18 @@ for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {
 
     my $topologyQuery = "select edges, nodes from topology where topologyId = " . $topologyId; # get information on topology (edges and nodes)
     my $topologyStatement;
+
     $topologyStatement = $ourDB->prepare($topologyQuery)
       or die "Couldn't prepare query `$topologyStatement': $DBI::errstr\n";
     $topologyStatement->execute();
+
     if (my $topologyRef = $topologyStatement->fetchrow_hashref()) {
 	print "Going for Topology\n";
       $dbEdges = $topologyRef->{'edges'}; # assign to edges
       $dbNodes = $topologyRef->{'nodes'}; # assign to nodes
     } else {
 	print "cmg back to algorithm:jenis\n";
-      goto ALGORITHMDONE; # no topology, so skip algorithm
+        goto ALGORITHMDONE; # no topology, so skip algorithm
     }
 
     # TODO: instead of parsing, we could format user data differently into the database
@@ -1174,9 +1180,11 @@ for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {
       my $stepperSerial;
       my $stepperQuery = "select stepper_serial from motes where moteid = " . $nodeId; # get stepper associated with mote
       my $stepperStatement;
+
       $stepperStatement = $ourDB->prepare($stepperQuery)
         or die "Couldn't prepare query `$stepperStatement': $DBI::errstr\n";
       $stepperStatement->execute();
+
       if (my $stepperRef = $stepperStatement->fetchrow_hashref()) {
         $stepperSerial = $stepperRef->{'stepper_serial'}; # assign to stepperSerial
       } else {
@@ -1184,13 +1192,19 @@ for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {
       }
 
       my $Lu;
+
+	#TODO: something wrong is happening at below line. Not getting Lu data as required.
+
       foreach my $connectedNode ($edges{$nodeId}) {
         $Lu .= $connectedNode . ",";
       }
-
+	print "Node Id: ".$nodeId."\n";
+	print "Stepper Serial:".$stepperSerial."\n";
+	print "Lu: ".$Lu."\n";
       my @algoResult = `perl topologyConfig.pl $nodeId $stepperSerial $Lu`; # apply algorithm
       my $bestD = $algoResult[0]; # TODO: could also store these values in database from the topologyConfig script
       my $bestP = $algoResult[1];
+      #my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
       my @Lr = split(" ", $algoResult[2]);
 
       # TODO: use values for error (put results into zip)
@@ -1201,17 +1215,17 @@ for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {
 ALGORITHMDONE:
 
   my @threadArray;
-print "**************\n";
+  print "**************\n";
   print "number of mote program " . $#moteProgram . "\n";
-print "**************\n";
+  print "**************\n";
 
   while (my $moteInfoRef = $moteInfoStatement->fetchrow_hashref()) {
-print "**************\n";
-    print " counting ...  " . "\n";
-print "**************\n";
-print "moteid:" . "$moteInfoRef->{'moteid'}\n";
-print "Moteid Program:" . "$moteProgram[1]\n";
-print "Moteid Program 2:" . "$moteProgram[2]\n";
+  print "**************\n";
+  print " counting ...  " . "\n";
+  print "**************\n";
+  print "moteid:" . "$moteInfoRef->{'moteid'}\n";
+#print "Moteid Program:" . "$moteProgram[1]\n";
+#print "Moteid Program 2:" . "$moteProgram[2]\n";
   #  if (!exists($moteProgram[$moteInfoRef->{'moteid'}])) {
 
    #   print " skipping ... " . "\n";
