@@ -32,6 +32,7 @@ my $bestP = $p;
 
 my $_ROTATE = "java -cp .:phidget21.jar Rotate $stepperSerial";
 #my $_HELLO = "perl helloProgram.pl $node";
+# TODO: You are suppose to send the power to get acknowledges by power. Modify the below _HELLO string to get the changes.
 my $_HELLO = "java hellomote.LoadPrograms $node";
 while (1) {
   print "$_ROTATE $d";
@@ -40,7 +41,7 @@ while (1) {
   @Lr = ();
   my $currentError = 0;
   # TODO: send hello message and collect acks;
-  #while (0) {
+#  while (0) {
   my $ackList = `$_HELLO $p`;
   my @acks = split(',', $ackList);
   foreach my $ack (@acks) { # for each acknowledgement

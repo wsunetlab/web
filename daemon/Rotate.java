@@ -14,18 +14,18 @@ public class Rotate {
         // connect stepper
         System.out.println("Connecting stepper phidget " + stepper_serial + "...");
         StepperPhidget stepper = new StepperPhidget();
-       System.out.println("Object created");
+//       System.out.println("Object created");
 	 stepper.open(stepper_serial);
-	System.out.println("Opened ");
+//	System.out.println("Opened ");
         stepper.waitForAttachment();
-	System.out.println("Attached");
+//	System.out.println("Attached");
         stepper.setVelocityLimit(0, 899.0); // TODO: calibrate for lab setting
         stepper.setAcceleration(0, 64808.0);
         stepper.setCurrentLimit(0, 0.51);
-	System.out.println("Limits set");
+//	System.out.println("Limits set");
         stepper.setEngaged(0, true);
         System.out.println("Connected: " + stepper.getSerialNumber());
-        System.out.println("Current limit: " + stepper.getCurrentLimit(0) + ". Velocity limit: " + stepper.getVelocityLimit(0));
+//        System.out.println("Current limit: " + stepper.getCurrentLimit(0) + ". Velocity limit: " + stepper.getVelocityLimit(0));
         
         // rotate (translate d to steps)
 	// phidget API: a change of 16 in position = 1 full step
