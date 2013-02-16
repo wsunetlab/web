@@ -26,7 +26,7 @@ my $run_result;
 	#print "$commandString\n";
 #}
 }
-sleep(10);
+sleep(40);
 
 my $GetProcessId = `ps -ef | grep "java net.tinyos.tools.Listen" | awk '{print \$2}'  > processes.txt`;
 my $process_id;
