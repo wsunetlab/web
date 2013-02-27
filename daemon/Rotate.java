@@ -33,5 +33,6 @@ public class Rotate {
 	// so: (d / 0.9) * 16 = new physical stepper position
 	long targetPos = (long) ((d / 0.9) * 16);
         stepper.setTargetPosition(0, targetPos);
+	stepper.close();
     }
 }
