@@ -41,7 +41,12 @@ public class LoadPrograms {
 	public static void main(String[] args) {
 
 		String s, s1;
-		final String CFLAGS = "-DCC2420_DEF_RFPOWER=";
+		String CFLAGS = "CFLAGS=-DCC2420_DEF_RFPOWER=";
+		String transPower=null;
+	
+		if(args[1] != null){
+			transPower = args[1];
+		}
 
 	try {
 /*
@@ -81,16 +86,29 @@ public class LoadPrograms {
 	/**
 	* Install Null Program 
 	**/
+	
 	String nullCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
-
+	System.out.println("Null command:"+nullCommand);
 	nullProgProcess = Runtime.getRuntime().exec(nullCommand, null,
 						nullProgDir);
 	/**
         * Install Actual Program 
         **/
+	String moteCommand = null;
+//	StringBuilder moteCommand = new StringBuilder();
+//	String mc2=null;
+	if(args[1] != null){
+//		moteCommand.append(CFLAGS).append(transPower).append(" make telosb install.").append(moteIdList.get(i).toString()).append(" bsl,").append(moteAddrList.get(i).toString());
+//	mc2 = moteCommand.toString();
 
-	String moteCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
-
+		moteCommand = (CFLAGS.concat(transPower)).concat(("make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString())));
+	
+	System.out.println(" Mote command: "+mc2);
+	
+	}else{
+        	moteCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
+	}
+	
 	moteProgProcess = Runtime.getRuntime().exec(moteCommand, null,
 						moteProgDir);
 
@@ -100,10 +118,10 @@ public class LoadPrograms {
 
 	// read the output from the command
 
-	System.out.println("Here is the standard output of the command:\n");
+	System.out.println("Installed Null program and then actaul mote program; Here is the standard output of the command:\n");
 
 	while ((s = stdInput.readLine()) != null) {
-	//	System.out.println(s);
+		System.out.println(s);
 	}
 
 	// read any errors from the attempted command
@@ -130,14 +148,14 @@ public class LoadPrograms {
 
 	// read the output from the command
 
-	System.out.println("Here is the standard output of the command:\n");
+	System.out.println("Data read started; Here is the standard output of the command:\n");
 	
 	while ((s1 = stdInput2.readLine()) != null) {
 		System.out.println(s1);
 	}
 
         for (int j = 0; j < noOfMotes; j++) {
-	System.out.println("cmg after message");
+//	System.out.println("cmg after message");
         	String eraseCommand = "make telosb install.".concat(moteIdList.get(j).toString()).concat(" bsl,").concat(moteAddrList.get(j).toString());
 
         eraseProgProcess = Runtime.getRuntime().exec(eraseCommand, null,
@@ -149,7 +167,7 @@ public class LoadPrograms {
 
         // read the output from the command
 
-        System.out.println("Here is the standard output of the command:\n");
+        System.out.println("Motes Erased; Here is the standard output of the command:\n");
 
         while ((s1 = stdInput3.readLine()) != null) {
                 System.out.println(s1);

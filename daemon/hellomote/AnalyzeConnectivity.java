@@ -108,13 +108,13 @@ public class AnalyzeConnectivity {
 
 	
 	for (l = 0; l < noOfFiles; l++){
-		System.out.println("Current Fl No:"+ l);	
+	//	System.out.println("Current Fl No:"+ l);	
 
 // Modified by Jenis & Date: Feb 13 2013: Used mote id list to identify file .
-	System.out.println("Moteid:"+moteIdList.get(l).toString());
+//	System.out.println("Moteid:"+moteIdList.get(l).toString());
 	String fileName = "/var/www/web/daemon/hellomote/USB".concat((moteIdList.get(l).toString()).concat("Data.txt"));
 
-	System.out.println("File name: " + fileName);
+//	System.out.println("File name: " + fileName);
 
 	FileInputStream fstream = new FileInputStream(fileName);
 	DataInputStream in = new DataInputStream(fstream);
@@ -123,9 +123,9 @@ public class AnalyzeConnectivity {
 	List<String[]> tokenList = new ArrayList<String[]>();
 	
 	while ((strLine = br.readLine()) != null) {
-		System.out.println("cmg in loop to read the data: "+strLine);	
+//		System.out.println("cmg in loop to read the data: "+strLine);	
 		stringTokenizer = new StringTokenizer(strLine);
-		System.out.println("StringTokenizer:"+stringTokenizer);
+//		System.out.println("StringTokenizer:"+stringTokenizer);
 		int i = 0;
 		
 		tokenArray = new String[12];
@@ -141,9 +141,9 @@ public class AnalyzeConnectivity {
 		int receiver_node = Integer.parseInt(tokenArray[4]);
 		int sender_node = Integer.parseInt(tokenArray[tokenArray.length - 1]);
 
-		System.out.println("Msg Decimal:"+msg_decimal);
-		System.out.println("Sender Node:"+sender_node);
-		System.out.println("Receiver node:"+receiver_node);
+//		System.out.println("Msg Decimal:"+msg_decimal);
+//		System.out.println("Sender Node:"+sender_node);
+//		System.out.println("Receiver node:"+receiver_node);
 
 		moteCreateTableStat.executeUpdate("insert into auth.data_"+currentDate+"(send_addr,msg_counter,rec_addr,time_Stamp) values ("+Integer.toString(sender_node)+","+Integer.toString(msg_decimal)+","+Integer.toString(receiver_node)+","+ "NOW())");
 
@@ -160,7 +160,7 @@ public class AnalyzeConnectivity {
 
 		tokenList.add(tokenArray);
 	}
-	System.out.println("Current l:"+l);
+//	System.out.println("Current l:"+l);
 
 	in.close();
 }
@@ -184,14 +184,14 @@ public class AnalyzeConnectivity {
 //			 linkQualityTableStat.executeUpdate("insert into auth.linkQuality"+"(send_addr,PRR,rec_addr) values ("+Integer.toString(i)+","+prr[i][j]+","+Integer.toString(j)+")");
 
 			 linkQualityTableStat.executeUpdate("insert into auth.linkQuality"+"(send_addr,PRR,rec_addr) values ("+Integer.toString(moteI)+","+prr[i][j]+","+Integer.toString(moteJ)+")");
-			System.out.println("Sender: "+ moteI+ " Receiver: "
+		/*	System.out.println("Sender: "+ moteI+ " Receiver: "
 					+ moteJ+ " Actual Number of Msg Received: "
 					+ totalMsgFromSToR[moteI][moteJ]
 					+ " Expected Number of Msg Received: "
 					+ (maxMsgFromSToR[moteI][moteJ]
 					- minMsgFromSToR[moteI][moteJ] + 1)
 					+ " Packet reception Ratio: "
-					+ prr[i][j] + "%");
+					+ prr[i][j] + "%");*/
 					}
 				}
 			} 
