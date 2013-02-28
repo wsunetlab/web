@@ -41,7 +41,7 @@ public class LoadPrograms {
 	public static void main(String[] args) {
 
 		String s, s1;
-		String CFLAGS = "CFLAGS=-DCC2420_DEF_RFPOWER=";
+		String CFLAGS_POWER = "-DCC2420_DEF_RFPOWER=";
 		String transPower=null;
 	
 		if(args[1] != null){
@@ -65,8 +65,8 @@ public class LoadPrograms {
 	preparedStatement = con.prepareStatement("select moteid,ip_addr from auth.motes where active='1'");
 	ResultSet rs = preparedStatement.executeQuery();
 
-	List moteIdList = new ArrayList();
-	List moteAddrList = new ArrayList();
+	List<String> moteIdList = new ArrayList<String>();
+	List<String> moteAddrList = new ArrayList<String>();
 
 	while(rs.next()){
 		String moteId = rs.getString("moteid");
@@ -77,7 +77,7 @@ public class LoadPrograms {
 	}
 
 	//int noOfMotes = 3;
-	int noOfMotes = (int) moteIdList.size();
+	int noOfMotes = moteIdList.size();
 	
 	Process moteProgProcess = null;
 	Process nullProgProcess = null, readDataProcess = null, eraseProgProcess= null;
@@ -96,19 +96,23 @@ public class LoadPrograms {
         **/
 	String moteCommand = null;
 //	StringBuilder moteCommand = new StringBuilder();
-//	String mc2=null;
+	ProcessBuilder pb=null;
 	if(args[1] != null){
-//		moteCommand.append(CFLAGS).append(transPower).append(" make telosb install.").append(moteIdList.get(i).toString()).append(" bsl,").append(moteAddrList.get(i).toString());
-//	mc2 = moteCommand.toString();
 
-		moteCommand = (CFLAGS.concat(transPower)).concat(("make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString())));
+	pb = new ProcessBuilder("make","telosb","install."+moteIdList.get(i).toString(),"bsl,"+moteAddrList.get(i).toString());
+	Map<String,String> env = pb.environment();
+	env.put("CFLAGS",CFLAGS_POWER); 
+
+//		moteCommand = (CFLAGS.concat(transPower)).concat(("make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString())));
 	
-	System.out.println(" Mote command: "+mc2);
 	
 	}else{
-        	moteCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
-	}
 	
+	pb = new ProcessBuilder("make","telosb","install."+moteIdList.get(i).toString(),"bsl,"+moteAddrList.get(i).toString());
+      // 	moteCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
+	}
+	moteProgProcess = pb.start();
+	/*
 	moteProgProcess = Runtime.getRuntime().exec(moteCommand, null,
 						moteProgDir);
 
@@ -131,7 +135,7 @@ public class LoadPrograms {
 	while ((s = stdError.readLine()) != null) {
 		System.out.println(s);
 	}
-	
+	*/
 }
 
 	String gatherCommand = "./GatherData.pl ".concat(Integer.toString(noOfMotes));

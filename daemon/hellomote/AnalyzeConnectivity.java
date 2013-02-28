@@ -50,21 +50,21 @@ public class AnalyzeConnectivity {
 		StringTokenizer stringTokenizer;
 		String tokenArray[] = null;
 		int INF_VALUE = 9999999;
-		List moteIdList;
+		List<String> moteIdList;
 	//	int noOfMotes = 3;
 	try{
 		Connection con = getJDBCConnection();
         	moteDataStatement = con.prepareStatement("select moteid,ip_addr from auth.motes where active='1'");
         	ResultSet rs = moteDataStatement.executeQuery();
 
-        	moteIdList = new ArrayList();
+        	moteIdList = new ArrayList<String>();
 	
         	while(rs.next()){
                 	String moteId = rs.getString("moteid");
                 	moteIdList.add(moteId);               
         	}
 
-		int noOfMotes = (int) moteIdList.size();
+		int noOfMotes = moteIdList.size();
 		int noOfFiles = noOfMotes;
 //		System.out.println("No of Motes: "+noOfMotes + " No of Files: " + noOfFiles);
 
