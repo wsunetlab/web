@@ -1161,9 +1161,9 @@ for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {
 
     # parse edges
     my %edges = (); # hash of edges
-    #foreach my $nodeId (@nodes) {
-    #  $edges{$nodeId} = (); # map each node to an adjacency array (initialize here)
-    #}
+    foreach my $nodeId (@nodes) {
+      $edges{$nodeId} = (); # map each node to an adjacency array (initialize here)
+    }
     my @edgeStrings = split(/\|/, $dbEdges); # split edges on "|" to get individual edges
     foreach my $edge (@edgeStrings) {
       my @edgeSplit = split(",", $edge); # split individual edge data on ","
