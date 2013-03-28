@@ -1225,12 +1225,15 @@ ALGORITHMDONE:
   print "**************\n";
   print "moteid:" . "$moteInfoRef->{'moteid'}\n";
 #print "Moteid Program:" . "$moteProgram[1]\n";
-#print "Moteid Program 2:" . "$moteProgram[2]\n";
-  #  if (!exists($moteProgram[$moteInfoRef->{'moteid'}])) {
+#print "Moteid Program :" . "$moteProgram[2]\n";
 
-   #   print " skipping ... " . "\n";
-   #   next;
-   # }
+# Jenis - added on March 27, 2013 : When disabling moteid "1", it was not giving any data, so tried to add below line according to "Motelab". If any problem comes, comment it out. 
+
+   if (!exists($moteProgram[$moteInfoRef->{'moteid'}])) {
+
+      print " skipping ... " . "\n";
+      next;
+    }
 print "**************\n";
     print "Reprogramming mote " . $moteInfoRef->{'moteid'} . "\n";
     my $t = new Thread (\&doProgram, 
