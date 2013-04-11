@@ -43,10 +43,11 @@ public class LoadPrograms {
 		String s, s1;
 		String CFLAGS_POWER = "-DCC2420_DEF_RFPOWER=";
 		String transPower=null;
-	
-		if(args[1] != null){
-			transPower = args[1];
+		
+		if(args.length != 0){
+			transPower = args[0];
 		}
+		
 
 	try {
 /*
@@ -86,22 +87,28 @@ public class LoadPrograms {
 	/**
 	* Install Null Program 
 	**/
+	System.out.println("cmg in loop");
+	ProcessBuilder nullPB = new ProcessBuilder("make","telosb","install."+moteIdList.get(i).toString(),"bsl,"+moteAddrList.get(i).toString());
+	nullPB.directory(nullProgDir);		
+	nullProgProcess = nullPB.start();
 	
+	System.out.println("After Starting null process");
+/*	
 	String nullCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
 	System.out.println("Null command:"+nullCommand);
 	nullProgProcess = Runtime.getRuntime().exec(nullCommand, null,
-						nullProgDir);
+						nullProgDir); */
 	/**
         * Install Actual Program 
         **/
 	String moteCommand = null;
 //	StringBuilder moteCommand = new StringBuilder();
 	ProcessBuilder pb=null;
-	if(args[1] != null){
+	if(transPower != null){
 
 	pb = new ProcessBuilder("make","telosb","install."+moteIdList.get(i).toString(),"bsl,"+moteAddrList.get(i).toString());
 	Map<String,String> env = pb.environment();
-	env.put("CFLAGS",CFLAGS_POWER); 
+	env.put("CFLAGS",CFLAGS_POWER+transPower); 
 
 //		moteCommand = (CFLAGS.concat(transPower)).concat(("make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString())));
 	
@@ -111,10 +118,10 @@ public class LoadPrograms {
 	pb = new ProcessBuilder("make","telosb","install."+moteIdList.get(i).toString(),"bsl,"+moteAddrList.get(i).toString());
       // 	moteCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
 	}
+	pb.directory(moteProgDir);
 	moteProgProcess = pb.start();
-	/*
-	moteProgProcess = Runtime.getRuntime().exec(moteCommand, null,
-						moteProgDir);
+	
+//	moteProgProcess = Runtime.getRuntime().exec(moteCommand, null,moteProgDir);
 
 	BufferedReader stdInput = new BufferedReader(new InputStreamReader(moteProgProcess.getInputStream()));
 
@@ -135,7 +142,7 @@ public class LoadPrograms {
 	while ((s = stdError.readLine()) != null) {
 		System.out.println(s);
 	}
-	*/
+	
 }
 
 	String gatherCommand = "./GatherData.pl ".concat(Integer.toString(noOfMotes));

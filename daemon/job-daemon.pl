@@ -954,9 +954,9 @@ print "**************\n";
 # changed loop to include currentMoteprog +1 by Jenis
 #changed again to 0 : Nov 29 2012 , testing
 # didn't work above, so added @currentmoteprog to the loop, testing
-#  for (my $moteid = 1; $moteid < $#currentMoteProg; $moteid++) {
-for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {
-    	
+#  for (my $moteid = 1; $moteid <= $#currentMoteProg; $moteid++) {
+print "Current mote prog size: @currentMoteProg\n";
+for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {    	
 	my $fileid;
 	print "Current mote prog:$#currentMoteProg\n";
 	print "moteId:$moteid\n";
@@ -1169,8 +1169,14 @@ for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {
       my @edgeSplit = split(",", $edge); # split individual edge data on ","
       my $node1 = substr($edgeSplit[0], 1); # offset by 1 to ignore "("
       my $node2 = substr($edgeSplit[1], 1); # offset by 1 to ignore " "
+	print "Node 1:$node1\n";
+	print "Node 2:$node2\n";
       push(@{$edges{$node1}}, $node2); # add node2 to node1's array of connected nodes
+	print "Total edges: @{$edges{$node1}}\n";
+
     }
+
+	print "Total edges again :@{$edges{1}}\n";
 
     `sudo chmod 666 /dev/ttyUSB*`; # write permission for motes
     `sudo chmod 666 /dev/bus/usb/*/*`; # write permissions for usb
@@ -1196,16 +1202,23 @@ for (my $moteid = 1; $moteid <= @currentMoteProg; $moteid++) {
 	#TODO: something wrong is happening at below line. Not getting Lu data as required.
 
       foreach my $connectedNode ($edges{$nodeId}) {
+	print "Edges{nodeid} : $edges{$nodeId} \n";
+	print "Edges node id size : @edges{$nodeId} \n";
+	print "ConnectedNode: $connectedNode\n";
         $Lu .= $connectedNode . ",";
       }
 	print "Node Id: ".$nodeId."\n";
 	print "Stepper Serial:".$stepperSerial."\n";
 	print "Lu: ".$Lu."\n";
-      my @algoResult = `perl topologyConfig.pl $nodeId $stepperSerial $Lu`; # apply algorithm
-      my $bestD = $algoResult[0]; # TODO: could also store these values in database from the topologyConfig script
-      my $bestP = $algoResult[1];
+	
+	print `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3`;
+	#print `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl $nodeId $stepperSerial $Lu`;
+	sleep(10);
+#      my @algoResult = `/usr/bin/perl topologyConfig.pl $nodeId $stepperSerial $Lu`; # apply algorithm
+  #    my $bestD = $algoResult[0]; # TODO: could also store these values in database from the topologyConfig script
+   #   my $bestP = $algoResult[1];
       #my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
-      my @Lr = split(" ", $algoResult[2]);
+   #   my @Lr = split(" ", $algoResult[2]);
 
       # TODO: use values for error (put results into zip)
     }
@@ -1229,11 +1242,11 @@ ALGORITHMDONE:
 
 # Jenis - added on March 27, 2013 : When disabling moteid "1", it was not giving any data, so tried to add below line according to "Motelab". If any problem comes, comment it out. 
 
-   if (!exists($moteProgram[$moteInfoRef->{'moteid'}])) {
+ #  if (!exists($moteProgram[$moteInfoRef->{'moteid'}])) {
 
-      print " skipping ... " . "\n";
-      next;
-    }
+  #    print " skipping ... " . "\n";
+  #    next;
+  #  }
 print "**************\n";
     print "Reprogramming mote " . $moteInfoRef->{'moteid'} . "\n";
     my $t = new Thread (\&doProgram, 

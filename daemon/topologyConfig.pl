@@ -18,9 +18,10 @@ my $userNodeList = $ARGV[2];
 
 my @Lu;
 #my $Lu;
+print " coming in topologyconfig.pl \n";
 if (defined($userNodeList)) {
   @Lu = split(',', $userNodeList);
-  print "Lu Size: $Lu \n";
+  print "Lu Size:", scalar @Lu ,"\n";
 } else {
   @Lu = (); # user wants this node to connect to no other nodes
 }
@@ -29,10 +30,19 @@ my $p = $_PMAX;
 my @Lr;
 my $bestError = $#Lu;
 my $d = 0;
+#just for testing
+$d =20;
 my $bestD = $d;
 my $bestP = $p;
 
-my $_ROTATE = "java -cp .:phidget21.jar Rotate $stepperSerial";
+chdir("/var/www/web/daemon") or die "$1";
+# to get current directory
+use Cwd qw();
+my $path = Cwd::cwd();
+print "Current directory:$path\n";
+#
+
+my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/phidget21.jar Rotate $stepperSerial";
 #my $_HELLO = "perl helloProgram.pl $node";
 # TODO: You are suppose to send the power to get acknowledges by power. Modify the below _HELLO string to get the changes.
 my $_HELLO = "java hellomote.LoadPrograms $node";
@@ -41,16 +51,21 @@ $i = 0;
 while($i <= 2){
 #  print "$_ROTATE $d";
   print "Applied Degree : $d\n";
-  print `$_ROTATE $d\n`;
+	my $out1 = system("$_ROTATE $d");
+	
+#  my $out = system("$_ROTATE");
+ print "Java output:$out1\n";
+#  print `$_ROTATE $d\n`;
+sleep(10);
   print "done rotating\n";
   @Lr = ();
   my $currentError = 0;
   # TODO: send hello message and collect acks;
   #  while (0) {
 # Run Hello world ack code 
-  my $ackList = `$_HELLO $p`;
+my $ackList = `$_HELLO $p`;
   
-  sleep(10);
+#  sleep(10);
   
 =for comment
   my @acks = split(',', $ackList);
