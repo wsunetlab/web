@@ -1,388 +1,0 @@
-**************
-select files.path, files.name, files.user, files.type, files.id, jobfiles.moteid from files, jobfiles where jobfiles.jobid=99 and jobfiles.fileid = files.id and jobfiles.moteid = 0
-**************
-**************
-TestSerialMsg
-**************
-**************
-/var/www/web/users/elijah_houle@wsu.edu/upload/TestSerialMsg_20130410164355.class
-Java class name: TestSerialMsg
-**************
-/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353
-**************
-Current mote prog size: 192 191 191 191
-Current mote prog:3
-moteId:1
-**************
-192 191 191 191
-Current mote program : 4
-**************
-Test 1:191
-**************
-fileid 191
-**************
-**************
-setMoteId:/var/www/web/bin/set-mote-id --exe "/var/www/web/users/elijah_houle@wsu.edu/upload/testserialmainapp_20130410164330.exe" "/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/1.exe" 1**************
-**************
-Output:
-**************
-**************
-**************
-moteProgram[1]:"/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/1.ihex"
-**************
-Added program /var/www/web/users/elijah_houle@wsu.edu/upload/testserialmainapp_20130410164330.exe for mote #1
-
-**************
-Current mote prog:3
-moteId:2
-**************
-192 191 191 191
-Current mote program : 4
-**************
-Test 1:191
-**************
-fileid 191
-**************
-**************
-setMoteId:/var/www/web/bin/set-mote-id --exe "/var/www/web/users/elijah_houle@wsu.edu/upload/testserialmainapp_20130410164330.exe" "/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/2.exe" 2**************
-**************
-Output:
-**************
-**************
-**************
-moteProgram[2]:"/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/2.ihex"
-**************
-Added program /var/www/web/users/elijah_houle@wsu.edu/upload/testserialmainapp_20130410164330.exe for mote #1
-Added program /var/www/web/users/elijah_houle@wsu.edu/upload/testserialmainapp_20130410164330.exe for mote #2
-
-**************
-Current mote prog:3
-moteId:3
-**************
-192 191 191 191
-Current mote program : 4
-**************
-Test 1:191
-**************
-fileid 191
-**************
-**************
-setMoteId:/var/www/web/bin/set-mote-id --exe "/var/www/web/users/elijah_houle@wsu.edu/upload/testserialmainapp_20130410164330.exe" "/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/3.exe" 3**************
-**************
-Output:
-**************
-**************
-**************
-moteProgram[3]:"/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/3.ihex"
-**************
-Added program /var/www/web/users/elijah_houle@wsu.edu/upload/testserialmainapp_20130410164330.exe for mote #1
-Added program /var/www/web/users/elijah_houle@wsu.edu/upload/testserialmainapp_20130410164330.exe for mote #2
-Added program /var/www/web/users/elijah_houle@wsu.edu/upload/testserialmainapp_20130410164330.exe for mote #3
-
-**************
-Current mote prog:3
-moteId:4
-**************
-192 191 191 191
-Current mote program : 4
-**************
-Test 1:
-currentMoteProg skipping ... 
-Going for Topology
-Node 1:1
-Node 2:2
-Total edges: 2
-Node 1:1
-Node 2:3
-Total edges: 2 3
-Total edges again :2 3
-Edges{nodeid} : ARRAY(0x9511a78) 
-Edges node id size : ARRAY(0x9511a78) 
-ConnectedNode: ARRAY(0x9511a78)
-Node Id: 1
-Stepper Serial:283607
-Lu: ARRAY(0x9511a78),
- coming in topologyconfig.pl 
-Lu Size:2
-Current directory:/var/www/web/daemon
-Applied Degree : 0
-*********** JAVA Rotate Program **************
-Connecting stepper phidget 283607...
-Connected: 283607
-Java output:0
-done rotating
-New Degree d: 20 
-Applied Degree : 20
-*********** JAVA Rotate Program **************
-Connecting stepper phidget 283607...
-Connected: 283607
-Java output:0
-done rotating
-New Degree d: 40 
-Applied Degree : 40
-*********** JAVA Rotate Program **************
-Connecting stepper phidget 283607...
-Connected: 283607
-Java output:0
-done rotating
-New Degree d: 60 
-Best Degree D :0
-Best Tranmission Power P: 31
-New Node List: 
-Edges{nodeid} :  
-Edges node id size :  
-ConnectedNode: 
-Node Id: 2
-Stepper Serial:269861
-Lu: ,
- coming in topologyconfig.pl 
-Lu Size:2
-Current directory:/var/www/web/daemon
-Applied Degree : 0
-*********** JAVA Rotate Program **************
-Connecting stepper phidget 283607...
-Connected: 283607
-Java output:0
-done rotating
-New Degree d: 20 
-Applied Degree : 20
-*********** JAVA Rotate Program **************
-Connecting stepper phidget 283607...
-Connected: 283607
-Java output:0
-done rotating
-New Degree d: 40 
-Applied Degree : 40
-*********** JAVA Rotate Program **************
-Connecting stepper phidget 283607...
-Connected: 283607
-Java output:0
-done rotating
-New Degree d: 60 
-Best Degree D :0
-Best Tranmission Power P: 31
-New Node List: 
-Edges{nodeid} :  
-Edges node id size :  
-ConnectedNode: 
-Node Id: 3
-Stepper Serial:283607
-Lu: ,
- coming in topologyconfig.pl 
-Lu Size:2
-Current directory:/var/www/web/daemon
-Applied Degree : 0
-*********** JAVA Rotate Program **************
-Connecting stepper phidget 283607...
-Connected: 283607
-Java output:0
-done rotating
-New Degree d: 20 
-Applied Degree : 20
-*********** JAVA Rotate Program **************
-Connecting stepper phidget 283607...
-Connected: 283607
-Java output:0
-done rotating
-New Degree d: 40 
-Applied Degree : 40
-*********** JAVA Rotate Program **************
-Connecting stepper phidget 283607...
-Connected: 283607
-Java output:0
-done rotating
-New Degree d: 60 
-Best Degree D :0
-Best Tranmission Power P: 31
-New Node List: 
-**************
-number of mote program 3
-**************
-**************
- counting ...  
-**************
-moteid:1
-**************
-Reprogramming mote 1
-**************
-Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB0 -r -e -I -p 
-Program: "/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/1.ihex"
-**************
-**************
-erase mote 
-**************
- counting ...  
-**************
-moteid:2
-**************
-Reprogramming mote 2
-**************
- counting ...  
-**************
-moteid:3
-**************
-Reprogramming mote 3
-**************
-Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB1 -r -e -I -p 
-Program: "/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/2.ihex"
-**************
-**************
-erase mote 
-**************
-Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB2 -r -e -I -p 
-Program: "/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/3.ihex"
-**************
-**************
-erase mote 
-**************
-upload new program
-Execute command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB0 -r -e -I -p  "/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/1.ihex"**************
-upload new program
-Execute command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB1 -r -e -I -p  "/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/2.ihex"**************
-upload new program
-Execute command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB2 -r -e -I -p  "/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/3.ihex"moteoutput:Reprogramming 2
-MSP430 Bootstrap Loader Version: 1.39-telos-8
-Use -h for help
-Mass Erase...
-Transmit default password ...
-Invoking BSL...
-Transmit default password ...
-Current bootstrap loader version: 1.61 (Device ID: f16c)
-Changing baudrate to 38400 ...
-Program ...
-0 bytes programmed.
-Reset device ...
-
-**************
-moteoutput:Reprogramming 1
-MSP430 Bootstrap Loader Version: 1.39-telos-8
-Use -h for help
-Mass Erase...
-Transmit default password ...
-Invoking BSL...
-Transmit default password ...
-Current bootstrap loader version: 1.61 (Device ID: f16c)
-Changing baudrate to 38400 ...
-Program ...
-0 bytes programmed.
-Reset device ...
-
-**************
-moteoutput:Reprogramming 3
-MSP430 Bootstrap Loader Version: 1.39-telos-8
-Use -h for help
-Mass Erase...
-Transmit default password ...
-Invoking BSL...
-Transmit default password ...
-Current bootstrap loader version: 1.61 (Device ID: f16c)
-Changing baudrate to 38400 ...
-Program ...
-0 bytes programmed.
-Reset device ...
-
-**************
-**************
-/usr/lib/jvm/java-6-openjdk/bin/java -cp /var/www/web/util/tinyos.jar net.tinyos.sf.SerialForwarder -comm serial@/dev/ttyUSB0:115200 -port 9001 -no-gui -quiet
-**************
-**************
-before executing sfCommand
-**************
-**************
-/usr/lib/jvm/java-6-openjdk/bin/java -cp /var/www/web/util/tinyos.jar net.tinyos.sf.SerialForwarder -comm serial@/dev/ttyUSB1:115200 -port 9002 -no-gui -quiet
-**************
-**************
-before executing sfCommand
-**************
-SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written **************
-/usr/lib/jvm/java-6-openjdk/bin/java -cp /var/www/web/util/tinyos.jar net.tinyos.sf.SerialForwarder -comm serial@/dev/ttyUSB2:115200 -port 9003 -no-gui -quiet
-**************
-**************
-before executing sfCommand
-**************
-SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written **************
-/usr/lib/jvm/java-6-openjdk/bin/jar cvf /var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/classes.jar -C /var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/jar/ TestSerialMsg.class 
-**************
-SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written **************
-/usr/lib/jvm/java-6-openjdk/bin/java -Xms2m -Xmx3m -cp /var/www/web/util/tinyos.jar:/var/www/web/util/mysql-connector-java-5.1.10-bin.jar:/var/www/web/util/dbDump.jar:.:/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/classes.jar dbDump --dbHost netlab.encs.vancouver.wsu.edu --dbPort 3306 --dbUser root --dbPassword linhtinh --dbNoTimestamp --dbTablePrefix testSerialapp_353 --dbDatabase elijah_houle --redirect /var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/dblogger.log --verbose --classes TestSerialMsg 192  --connect 127.0.0.1:9001::1 127.0.0.1:9002::2 127.0.0.1:9003::3 
-**************
-**************
-/var/www/web/daemon/cents-daemon.pl ran @ Wed Apr 10 19:38:01 2013
-Started programming motes...
-Reprogramming 1
-MSP430 Bootstrap Loader Version: 1.39-telos-8
-Use -h for help
-Mass Erase...
-Transmit default password ...
-Invoking BSL...
-Transmit default password ...
-Current bootstrap loader version: 1.61 (Device ID: f16c)
-Changing baudrate to 38400 ...
-Program ...
-0 bytes programmed.
-Reset device ...
-Reprogramming 2
-MSP430 Bootstrap Loader Version: 1.39-telos-8
-Use -h for help
-Mass Erase...
-Transmit default password ...
-Invoking BSL...
-Transmit default password ...
-Current bootstrap loader version: 1.61 (Device ID: f16c)
-Changing baudrate to 38400 ...
-Program ...
-0 bytes programmed.
-Reset device ...
-Reprogramming 3
-MSP430 Bootstrap Loader Version: 1.39-telos-8
-Use -h for help
-Mass Erase...
-Transmit default password ...
-Invoking BSL...
-Transmit default password ...
-Current bootstrap loader version: 1.61 (Device ID: f16c)
-Changing baudrate to 38400 ...
-Program ...
-0 bytes programmed.
-Reset device ...
-
-Started new job with jobID 99
-jobs-daemon finished.  operation took 43 seconds
-**************
-                                                                              SF enabled, 0 clients, 1 packet read, 0 packets written                                                                               SF enabled, 0 clients, 1 packet read, 0 packets written                                                                               SF enabled, 0 clients, 1 packet read, 0 packets written                                                                               SF enabled, 0 clients, 2 packets read, 0 packets written                                                                               SF enabled, 0 clients, 2 packets read, 0 packets written                                                                               SF enabled, 0 clients, 2 packets read, 0 packets written                                                                               SF enabled, 0 clients, 3 packets read, 0 packets written                                                                               SF enabled, 0 clients, 3 packets read, 0 packets written                                                                               SF enabled, 0 clients, 3 packets read, 0 packets written                                                                               SF enabled, 0 clients, 4 packets read, 0 packets written                                                                               SF enabled, 0 clients, 4 packets read, 0 packets written                                                                               SF enabled, 0 clients, 4 packets read, 0 packets written                                                                               SF enabled, 0 clients, 5 packets read, 0 packets written                                                                               SF enabled, 0 clients, 5 packets read, 0 packets written                                                                               SF enabled, 0 clients, 5 packets read, 0 packets written                                                                               SF enabled, 0 clients, 6 packets read, 0 packets written                                                                               SF enabled, 0 clients, 6 packets read, 0 packets written                                                                               SF enabled, 0 clients, 6 packets read, 0 packets written                                                                               SF enabled, 1 client, 6 packets read, 0 packets written                                                                               SF enabled, 1 client, 6 packets read, 0 packets written                                                                               SF enabled, 1 client, 6 packets read, 0 packets written                                                                               SF enabled, 1 client, 7 packets read, 0 packets written                                                                               SF enabled, 1 client, 7 packets read, 0 packets written                                                                               SF enabled, 1 client, 7 packets read, 0 packets written                                                                               SF enabled, 1 client, 8 packets read, 0 packets written                                                                               SF enabled, 1 client, 8 packets read, 0 packets written                                                                               SF enabled, 1 client, 8 packets read, 0 packets written                                                                               SF enabled, 1 client, 9 packets read, 0 packets written                                                                               SF enabled, 1 client, 9 packets read, 0 packets written                                                                               SF enabled, 1 client, 9 packets read, 0 packets written                                                                               SF enabled, 1 client, 10 packets read, 0 packets written                                                                               SF enabled, 1 client, 10 packets read, 0 packets written                                                                               SF enabled, 1 client, 10 packets read, 0 packets written                                                                               SF enabled, 1 client, 11 packets read, 0 packets written                                                                               SF enabled, 1 client, 11 packets read, 0 packets written                                                                               SF enabled, 1 client, 11 packets read, 0 packets written                                                                               SF enabled, 1 client, 12 packets read, 0 packets written                                                                               SF enabled, 1 client, 12 packets read, 0 packets written                                                                               SF enabled, 1 client, 12 packets read, 0 packets written                                                                               SF enabled, 1 client, 13 packets read, 0 packets written                                                                               SF enabled, 1 client, 13 packets read, 0 packets written                                                                               SF enabled, 1 client, 13 packets read, 0 packets written                                                                               SF enabled, 1 client, 14 packets read, 0 packets written                                                                               SF enabled, 1 client, 14 packets read, 0 packets written                                                                               SF enabled, 1 client, 14 packets read, 0 packets written                                                                               SF enabled, 1 client, 15 packets read, 0 packets written                                                                               SF enabled, 1 client, 15 packets read, 0 packets written                                                                               SF enabled, 1 client, 15 packets read, 0 packets written                                                                               SF enabled, 1 client, 16 packets read, 0 packets written                                                                               SF enabled, 1 client, 16 packets read, 0 packets written                                                                               SF enabled, 1 client, 16 packets read, 0 packets written                                                                               SF enabled, 1 client, 17 packets read, 0 packets written                                                                               SF enabled, 1 client, 17 packets read, 0 packets written                                                                               SF enabled, 1 client, 17 packets read, 0 packets written                                                                               SF enabled, 1 client, 18 packets read, 0 packets written                                                                               SF enabled, 1 client, 18 packets read, 0 packets written                                                                               SF enabled, 1 client, 18 packets read, 0 packets written                                                                               SF enabled, 1 client, 19 packets read, 0 packets written                                                                               SF enabled, 1 client, 19 packets read, 0 packets written                                                                               SF enabled, 1 client, 19 packets read, 0 packets written                                                                               SF enabled, 1 client, 20 packets read, 0 packets written                                                                               SF enabled, 1 client, 20 packets read, 0 packets written                                                                               SF enabled, 1 client, 20 packets read, 0 packets written                                                                               SF enabled, 1 client, 21 packets read, 0 packets written                                                                               SF enabled, 1 client, 21 packets read, 0 packets written                                                                               SF enabled, 1 client, 21 packets read, 0 packets written                                                                               SF enabled, 1 client, 22 packets read, 0 packets written                                                                               SF enabled, 1 client, 22 packets read, 0 packets written                                                                               SF enabled, 1 client, 22 packets read, 0 packets written                                                                               SF enabled, 1 client, 23 packets read, 0 packets written                                                                               SF enabled, 1 client, 23 packets read, 0 packets written                                                                               SF enabled, 1 client, 23 packets read, 0 packets written                                                                               SF enabled, 1 client, 24 packets read, 0 packets written                                                                               SF enabled, 1 client, 24 packets read, 0 packets written                                                                               SF enabled, 1 client, 24 packets read, 0 packets written                                                                                                                                                             SF enabled, 1 client, 25 packets read, 0 packets written SF enabled, 1 client, 25 packets read, 0 packets written                                                                               SF enabled, 1 client, 25 packets read, 0 packets written                                                                               SF enabled, 1 client, 26 packets read, 0 packets written                                                                               SF enabled, 1 client, 26 packets read, 0 packets written                                                                               SF enabled, 1 client, 26 packets read, 0 packets written                                                                               SF enabled, 1 client, 27 packets read, 0 packets written                                                                               SF enabled, 1 client, 27 packets read, 0 packets written                                                                               SF enabled, 1 client, 27 packets read, 0 packets written                                                                               SF enabled, 1 client, 28 packets read, 0 packets written                                                                               SF enabled, 1 client, 28 packets read, 0 packets written                                                                               SF enabled, 1 client, 28 packets read, 0 packets written                                                                               SF enabled, 1 client, 29 packets read, 0 packets written                                                                               SF enabled, 1 client, 29 packets read, 0 packets written                                                                               SF enabled, 1 client, 29 packets read, 0 packets written                                                                               SF enabled, 1 client, 30 packets read, 0 packets written                                                                               SF enabled, 1 client, 30 packets read, 0 packets written                                                                               SF enabled, 1 client, 30 packets read, 0 packets written                                                                               SF enabled, 1 client, 31 packets read, 0 packets written                                                                               SF enabled, 1 client, 31 packets read, 0 packets written                                                                               SF enabled, 1 client, 31 packets read, 0 packets written                                                                               SF enabled, 1 client, 32 packets read, 0 packets written                                                                               SF enabled, 1 client, 32 packets read, 0 packets written                                                                               SF enabled, 1 client, 32 packets read, 0 packets written                                                                               SF enabled, 1 client, 33 packets read, 0 packets written                                                                               SF enabled, 1 client, 33 packets read, 0 packets written                                                                               SF enabled, 1 client, 33 packets read, 0 packets written                                                                               SF enabled, 1 client, 34 packets read, 0 packets written                                                                               SF enabled, 1 client, 34 packets read, 0 packets written                                                                               SF enabled, 1 client, 34 packets read, 0 packets written                                                                               SF enabled, 1 client, 35 packets read, 0 packets written                                                                               SF enabled, 1 client, 35 packets read, 0 packets written                                                                               SF enabled, 1 client, 35 packets read, 0 packets written                                                                               SF enabled, 1 client, 36 packets read, 0 packets written                                                                               SF enabled, 1 client, 36 packets read, 0 packets written                                                                               SF enabled, 1 client, 36 packets read, 0 packets written                                                                               SF enabled, 1 client, 37 packets read, 0 packets written                                                                               SF enabled, 1 client, 37 packets read, 0 packets written                                                                               SF enabled, 1 client, 37 packets read, 0 packets written                                                                               SF enabled, 1 client, 38 packets read, 0 packets written                                                                               SF enabled, 1 client, 38 packets read, 0 packets written                                                                               SF enabled, 1 client, 38 packets read, 0 packets written                                                                               SF enabled, 1 client, 39 packets read, 0 packets written                                                                               SF enabled, 1 client, 39 packets read, 0 packets written                                                                               SF enabled, 1 client, 39 packets read, 0 packets written                                                                               SF enabled, 1 client, 40 packets read, 0 packets written                                                                               SF enabled, 1 client, 40 packets read, 0 packets written                                                                               SF enabled, 1 client, 40 packets read, 0 packets written                                                                               SF enabled, 1 client, 41 packets read, 0 packets written                                                                               SF enabled, 1 client, 41 packets read, 0 packets written                                                                               SF enabled, 1 client, 41 packets read, 0 packets written                                                                               SF enabled, 1 client, 42 packets read, 0 packets written                                                                               SF enabled, 1 client, 42 packets read, 0 packets written                                                                               SF enabled, 1 client, 42 packets read, 0 packets written                                                                               SF enabled, 1 client, 43 packets read, 0 packets written                                                                               SF enabled, 1 client, 43 packets read, 0 packets written                                                                               SF enabled, 1 client, 43 packets read, 0 packets written                                                                               SF enabled, 1 client, 44 packets read, 0 packets written                                                                               SF enabled, 1 client, 44 packets read, 0 packets written                                                                               SF enabled, 1 client, 44 packets read, 0 packets written                                                                               SF enabled, 1 client, 45 packets read, 0 packets written                                                                               SF enabled, 1 client, 45 packets read, 0 packets written                                                                               SF enabled, 1 client, 45 packets read, 0 packets written                                                                               SF enabled, 1 client, 46 packets read, 0 packets written                                                                               SF enabled, 1 client, 46 packets read, 0 packets written                                                                               SF enabled, 1 client, 46 packets read, 0 packets written                                                                               SF enabled, 1 client, 47 packets read, 0 packets written                                                                               SF enabled, 1 client, 47 packets read, 0 packets written                                                                               SF enabled, 1 client, 47 packets read, 0 packets written                                                                               SF enabled, 1 client, 48 packets read, 0 packets written                                                                               SF enabled, 1 client, 48 packets read, 0 packets written                                                                               SF enabled, 1 client, 48 packets read, 0 packets written                                                                               SF enabled, 1 client, 49 packets read, 0 packets written                                                                               SF enabled, 1 client, 49 packets read, 0 packets written                                                                               SF enabled, 1 client, 49 packets read, 0 packets written                                                                               SF enabled, 1 client, 50 packets read, 0 packets written                                                                               SF enabled, 1 client, 50 packets read, 0 packets written                                                                               SF enabled, 1 client, 50 packets read, 0 packets written                                                                               SF enabled, 1 client, 51 packets read, 0 packets written                                                                               SF enabled, 1 client, 51 packets read, 0 packets written                                                                               SF enabled, 1 client, 51 packets read, 0 packets written                                                                               SF enabled, 1 client, 52 packets read, 0 packets written                                                                               SF enabled, 1 client, 52 packets read, 0 packets written                                                                               SF enabled, 1 client, 52 packets read, 0 packets written                                                                               SF enabled, 1 client, 53 packets read, 0 packets written                                                                               SF enabled, 1 client, 53 packets read, 0 packets written                                                                               SF enabled, 1 client, 53 packets read, 0 packets written                                                                               SF enabled, 1 client, 54 packets read, 0 packets written                                                                               SF enabled, 1 client, 54 packets read, 0 packets written                                                                               SF enabled, 1 client, 54 packets read, 0 packets written                                                                               SF enabled, 1 client, 55 packets read, 0 packets written                                                                               SF enabled, 1 client, 55 packets read, 0 packets written                                                                               SF enabled, 1 client, 55 packets read, 0 packets written                                                                               SF enabled, 1 client, 56 packets read, 0 packets written                                                                               SF enabled, 1 client, 56 packets read, 0 packets written                                                                               SF enabled, 1 client, 56 packets read, 0 packets written                                                                               SF enabled, 1 client, 57 packets read, 0 packets written                                                                               SF enabled, 1 client, 57 packets read, 0 packets written                                                                               SF enabled, 1 client, 57 packets read, 0 packets written                                                                               SF enabled, 1 client, 58 packets read, 0 packets written                                                                               SF enabled, 1 client, 58 packets read, 0 packets written                                                                               SF enabled, 1 client, 58 packets read, 0 packets written                                                                                                                                                             SF enabled, 1 client, 59 packets read, 0 packets written SF enabled, 1 client, 59 packets read, 0 packets written                                                                               SF enabled, 1 client, 59 packets read, 0 packets written                                                                               SF enabled, 1 client, 60 packets read, 0 packets written                                                                               SF enabled, 1 client, 60 packets read, 0 packets written                                                                               SF enabled, 1 client, 60 packets read, 0 packets written                                                                               SF enabled, 1 client, 61 packets read, 0 packets written                                                                               SF enabled, 1 client, 61 packets read, 0 packets written                                                                               SF enabled, 1 client, 61 packets read, 0 packets written                                                                               SF enabled, 1 client, 62 packets read, 0 packets written                                                                               SF enabled, 1 client, 62 packets read, 0 packets written                                                                               SF enabled, 1 client, 62 packets read, 0 packets written                                                                               SF enabled, 1 client, 63 packets read, 0 packets written                                                                               SF enabled, 1 client, 63 packets read, 0 packets written                                                                               SF enabled, 1 client, 63 packets read, 0 packets written                                                                               SF enabled, 1 client, 64 packets read, 0 packets written                                                                               SF enabled, 1 client, 64 packets read, 0 packets written                                                                               SF enabled, 1 client, 64 packets read, 0 packets written                                                                               SF enabled, 1 client, 65 packets read, 0 packets written                                                                               SF enabled, 1 client, 65 packets read, 0 packets written                                                                               SF enabled, 1 client, 65 packets read, 0 packets written                                                                               SF enabled, 1 client, 66 packets read, 0 packets written                                                                               SF enabled, 1 client, 66 packets read, 0 packets written                                                                               SF enabled, 1 client, 66 packets read, 0 packets written                                                                               SF enabled, 1 client, 67 packets read, 0 packets written                                                                               SF enabled, 1 client, 67 packets read, 0 packets written                                                                               SF enabled, 1 client, 67 packets read, 0 packets written                                                                               SF enabled, 1 client, 68 packets read, 0 packets written                                                                               SF enabled, 1 client, 68 packets read, 0 packets written                                                                               SF enabled, 1 client, 68 packets read, 0 packets written                                                                               SF enabled, 1 client, 69 packets read, 0 packets written                                                                               SF enabled, 1 client, 69 packets read, 0 packets written                                                                               SF enabled, 1 client, 69 packets read, 0 packets written                                                                               SF enabled, 1 client, 70 packets read, 0 packets written                                                                               SF enabled, 1 client, 70 packets read, 0 packets written                                                                               SF enabled, 1 client, 70 packets read, 0 packets written                                                                               SF enabled, 1 client, 71 packets read, 0 packets written                                                                               SF enabled, 1 client, 71 packets read, 0 packets written                                                                               SF enabled, 1 client, 71 packets read, 0 packets written                                                                               SF enabled, 1 client, 72 packets read, 0 packets written                                                                               SF enabled, 1 client, 72 packets read, 0 packets written                                                                               SF enabled, 1 client, 72 packets read, 0 packets written                                                                               SF enabled, 1 client, 73 packets read, 0 packets written                                                                               SF enabled, 1 client, 73 packets read, 0 packets written                                                                               SF enabled, 1 client, 73 packets read, 0 packets written                                                                               SF enabled, 1 client, 74 packets read, 0 packets written                                                                               SF enabled, 1 client, 74 packets read, 0 packets written                                                                               SF enabled, 1 client, 74 packets read, 0 packets written                                                                               SF enabled, 1 client, 75 packets read, 0 packets written                                                                               SF enabled, 1 client, 75 packets read, 0 packets written                                                                               SF enabled, 1 client, 75 packets read, 0 packets written                                                                               SF enabled, 1 client, 76 packets read, 0 packets written                                                                               SF enabled, 1 client, 76 packets read, 0 packets written                                                                               SF enabled, 1 client, 76 packets read, 0 packets written                                                                               SF enabled, 1 client, 77 packets read, 0 packets written                                                                               SF enabled, 1 client, 77 packets read, 0 packets written                                                                               SF enabled, 1 client, 77 packets read, 0 packets written                                                                               SF enabled, 1 client, 78 packets read, 0 packets written                                                                               SF enabled, 1 client, 78 packets read, 0 packets written                                                                               SF enabled, 1 client, 78 packets read, 0 packets written                                                                               SF enabled, 1 client, 79 packets read, 0 packets written                                                                               SF enabled, 1 client, 79 packets read, 0 packets written                                                                               SF enabled, 1 client, 79 packets read, 0 packets written                                                                               SF enabled, 1 client, 80 packets read, 0 packets written                                                                               SF enabled, 1 client, 80 packets read, 0 packets written                                                                               SF enabled, 1 client, 80 packets read, 0 packets written                                                                               SF enabled, 1 client, 81 packets read, 0 packets written                                                                               SF enabled, 1 client, 81 packets read, 0 packets written                                                                               SF enabled, 1 client, 81 packets read, 0 packets written                                                                               SF enabled, 1 client, 82 packets read, 0 packets written                                                                               SF enabled, 1 client, 82 packets read, 0 packets written                                                                               SF enabled, 1 client, 82 packets read, 0 packets written                                                                               SF enabled, 1 client, 83 packets read, 0 packets written                                                                               SF enabled, 1 client, 83 packets read, 0 packets written                                                                               SF enabled, 1 client, 83 packets read, 0 packets written                                                                               SF enabled, 1 client, 84 packets read, 0 packets written                                                                               SF enabled, 1 client, 84 packets read, 0 packets written                                                                               SF enabled, 1 client, 84 packets read, 0 packets written                                                                               SF enabled, 1 client, 85 packets read, 0 packets written                                                                               SF enabled, 1 client, 85 packets read, 0 packets written                                                                               SF enabled, 1 client, 85 packets read, 0 packets written                                                                               SF enabled, 1 client, 86 packets read, 0 packets written                                                                               SF enabled, 1 client, 86 packets read, 0 packets written                                                                               SF enabled, 1 client, 86 packets read, 0 packets written                                                                               SF enabled, 1 client, 87 packets read, 0 packets written                                                                               SF enabled, 1 client, 87 packets read, 0 packets written                                                                               SF enabled, 1 client, 87 packets read, 0 packets written                                                                               SF enabled, 1 client, 88 packets read, 0 packets written                                                                               SF enabled, 1 client, 88 packets read, 0 packets written                                                                               SF enabled, 1 client, 88 packets read, 0 packets written                                                                               SF enabled, 1 client, 89 packets read, 0 packets written                                                                               SF enabled, 1 client, 89 packets read, 0 packets written                                                                               SF enabled, 1 client, 89 packets read, 0 packets written                                                                               SF enabled, 1 client, 90 packets read, 0 packets written                                                                               SF enabled, 1 client, 90 packets read, 0 packets written                                                                               SF enabled, 1 client, 90 packets read, 0 packets written                                                                               SF enabled, 1 client, 91 packets read, 0 packets written                                                                               SF enabled, 1 client, 91 packets read, 0 packets written                                                                               SF enabled, 1 client, 91 packets read, 0 packets written                                                                                                                                                             SF enabled, 1 client, 92 packets read, 0 packets written SF enabled, 1 client, 92 packets read, 0 packets written                                                                               SF enabled, 1 client, 92 packets read, 0 packets written                                                                               SF enabled, 1 client, 93 packets read, 0 packets written                                                                               SF enabled, 1 client, 93 packets read, 0 packets written                                                                               SF enabled, 1 client, 93 packets read, 0 packets written                                                                               SF enabled, 1 client, 94 packets read, 0 packets written                                                                               SF enabled, 1 client, 94 packets read, 0 packets written                                                                               SF enabled, 1 client, 94 packets read, 0 packets written                                                                               SF enabled, 1 client, 95 packets read, 0 packets written                                                                               SF enabled, 1 client, 95 packets read, 0 packets written                                                                               SF enabled, 1 client, 95 packets read, 0 packets written                                                                               SF enabled, 1 client, 96 packets read, 0 packets written                                                                               SF enabled, 1 client, 96 packets read, 0 packets written                                                                               SF enabled, 1 client, 96 packets read, 0 packets written                                                                               SF enabled, 1 client, 97 packets read, 0 packets written                                                                               SF enabled, 1 client, 97 packets read, 0 packets written                                                                               SF enabled, 1 client, 97 packets read, 0 packets written                                                                               SF enabled, 1 client, 98 packets read, 0 packets written                                                                               SF enabled, 1 client, 98 packets read, 0 packets written                                                                               SF enabled, 1 client, 98 packets read, 0 packets written                                                                               SF enabled, 1 client, 99 packets read, 0 packets written                                                                               SF enabled, 1 client, 99 packets read, 0 packets written                                                                               SF enabled, 1 client, 99 packets read, 0 packets written                                                                               SF enabled, 1 client, 100 packets read, 0 packets written                                                                               SF enabled, 1 client, 100 packets read, 0 packets written                                                                               SF enabled, 1 client, 100 packets read, 0 packets written                                                                               SF enabled, 1 client, 101 packets read, 0 packets written                                                                               SF enabled, 1 client, 101 packets read, 0 packets written                                                                               SF enabled, 1 client, 101 packets read, 0 packets written                                                                               SF enabled, 1 client, 102 packets read, 0 packets written                                                                               SF enabled, 1 client, 102 packets read, 0 packets written                                                                               SF enabled, 1 client, 102 packets read, 0 packets written                                                                               SF enabled, 1 client, 103 packets read, 0 packets written                                                                               SF enabled, 1 client, 103 packets read, 0 packets written                                                                               SF enabled, 1 client, 103 packets read, 0 packets written                                                                               SF enabled, 1 client, 104 packets read, 0 packets written                                                                               SF enabled, 1 client, 104 packets read, 0 packets written                                                                               SF enabled, 1 client, 104 packets read, 0 packets written                                                                               SF enabled, 1 client, 105 packets read, 0 packets written                                                                               SF enabled, 1 client, 105 packets read, 0 packets written                                                                               SF enabled, 1 client, 105 packets read, 0 packets written                                                                               SF enabled, 1 client, 106 packets read, 0 packets written                                                                               SF enabled, 1 client, 106 packets read, 0 packets written                                                                               SF enabled, 1 client, 106 packets read, 0 packets written                                                                               SF enabled, 1 client, 107 packets read, 0 packets written                                                                               SF enabled, 1 client, 107 packets read, 0 packets written                                                                               SF enabled, 1 client, 107 packets read, 0 packets written                                                                               SF enabled, 1 client, 108 packets read, 0 packets written                                                                               SF enabled, 1 client, 108 packets read, 0 packets written                                                                               SF enabled, 1 client, 108 packets read, 0 packets written                                                                               SF enabled, 1 client, 109 packets read, 0 packets written                                                                               SF enabled, 1 client, 109 packets read, 0 packets written                                                                               SF enabled, 1 client, 109 packets read, 0 packets written                                                                               SF enabled, 1 client, 110 packets read, 0 packets written                                                                               SF enabled, 1 client, 110 packets read, 0 packets written                                                                               SF enabled, 1 client, 110 packets read, 0 packets written                                                                               SF enabled, 1 client, 111 packets read, 0 packets written                                                                               SF enabled, 1 client, 111 packets read, 0 packets written                                                                               SF enabled, 1 client, 111 packets read, 0 packets written                                                                               SF enabled, 1 client, 112 packets read, 0 packets written                                                                               SF enabled, 1 client, 112 packets read, 0 packets written                                                                               SF enabled, 1 client, 112 packets read, 0 packets written                                                                               SF enabled, 1 client, 113 packets read, 0 packets written                                                                               SF enabled, 1 client, 113 packets read, 0 packets written                                                                               SF enabled, 1 client, 113 packets read, 0 packets written                                                                               SF enabled, 1 client, 114 packets read, 0 packets written                                                                               SF enabled, 1 client, 114 packets read, 0 packets written                                                                               SF enabled, 1 client, 114 packets read, 0 packets written                                                                               SF enabled, 1 client, 115 packets read, 0 packets written                                                                               SF enabled, 1 client, 115 packets read, 0 packets written                                                                               SF enabled, 1 client, 115 packets read, 0 packets written                                                                               SF enabled, 1 client, 116 packets read, 0 packets written                                                                               SF enabled, 1 client, 116 packets read, 0 packets written                                                                               SF enabled, 1 client, 116 packets read, 0 packets written                                                                               SF enabled, 1 client, 117 packets read, 0 packets written                                                                               SF enabled, 1 client, 117 packets read, 0 packets written                                                                               SF enabled, 1 client, 117 packets read, 0 packets written                                                                               SF enabled, 1 client, 118 packets read, 0 packets written                                                                               SF enabled, 1 client, 118 packets read, 0 packets written                                                                               SF enabled, 1 client, 118 packets read, 0 packets written                                                                               SF enabled, 1 client, 119 packets read, 0 packets written                                                                               SF enabled, 1 client, 119 packets read, 0 packets written                                                                               SF enabled, 1 client, 119 packets read, 0 packets written                                                                               SF enabled, 1 client, 120 packets read, 0 packets written                                                                               SF enabled, 1 client, 120 packets read, 0 packets written                                                                               SF enabled, 1 client, 120 packets read, 0 packets written                                                                               SF enabled, 1 client, 121 packets read, 0 packets written                                                                               SF enabled, 1 client, 121 packets read, 0 packets written                                                                               SF enabled, 1 client, 121 packets read, 0 packets written                                                                               SF enabled, 1 client, 122 packets read, 0 packets written                                                                               SF enabled, 1 client, 122 packets read, 0 packets written                                                                               SF enabled, 1 client, 122 packets read, 0 packets written                                                                               SF enabled, 1 client, 123 packets read, 0 packets written                                                                               SF enabled, 1 client, 123 packets read, 0 packets written                                                                               SF enabled, 1 client, 123 packets read, 0 packets written                                                                               SF enabled, 1 client, 124 packets read, 0 packets written                                                                               SF enabled, 1 client, 124 packets read, 0 packets written                                                                               SF enabled, 1 client, 124 packets read, 0 packets written                                                                               SF enabled, 1 client, 125 packets read, 0 packets written                                                                               SF enabled, 1 client, 125 packets read, 0 packets written                                                                               SF enabled, 1 client, 125 packets read, 0 packets written                                                                               SF enabled, 1 client, 126 packets read, 0 packets written                                                                               SF enabled, 1 client, 126 packets read, 0 packets written                                                                               SF enabled, 1 client, 126 packets read, 0 packets written                                                                               SF enabled, 1 client, 127 packets read, 0 packets written                                                                               SF enabled, 1 client, 127 packets read, 0 packets written                                                                               SF enabled, 1 client, 127 packets read, 0 packets written                                                                               SF enabled, 1 client, 128 packets read, 0 packets written                                                                               SF enabled, 1 client, 128 packets read, 0 packets written                                                                               SF enabled, 1 client, 128 packets read, 0 packets written                                                                               SF enabled, 1 client, 129 packets read, 0 packets written                                                                               SF enabled, 1 client, 129 packets read, 0 packets written                                                                               SF enabled, 1 client, 129 packets read, 0 packets written                                                                               SF enabled, 1 client, 130 packets read, 0 packets written                                                                               SF enabled, 1 client, 130 packets read, 0 packets written                                                                               SF enabled, 1 client, 130 packets read, 0 packets written                                                                               SF enabled, 1 client, 131 packets read, 0 packets written                                                                               SF enabled, 1 client, 131 packets read, 0 packets written                                                                               SF enabled, 1 client, 131 packets read, 0 packets written                                                                               SF enabled, 1 client, 132 packets read, 0 packets written                                                                               SF enabled, 1 client, 132 packets read, 0 packets written                                                                               SF enabled, 1 client, 132 packets read, 0 packets written                                                                               SF enabled, 1 client, 133 packets read, 0 packets written                                                                               SF enabled, 1 client, 133 packets read, 0 packets written                                                                               SF enabled, 1 client, 133 packets read, 0 packets written                                                                               SF enabled, 1 client, 134 packets read, 0 packets written                                                                               SF enabled, 1 client, 134 packets read, 0 packets written                                                                               SF enabled, 1 client, 134 packets read, 0 packets written                                                                               SF enabled, 1 client, 135 packets read, 0 packets written                                                                               SF enabled, 1 client, 135 packets read, 0 packets written                                                                               SF enabled, 1 client, 135 packets read, 0 packets written                                                                               SF enabled, 1 client, 136 packets read, 0 packets written                                                                               SF enabled, 1 client, 136 packets read, 0 packets written                                                                               SF enabled, 1 client, 136 packets read, 0 packets written                                                                               SF enabled, 1 client, 137 packets read, 0 packets written                                                                               SF enabled, 1 client, 137 packets read, 0 packets written                                                                               SF enabled, 1 client, 137 packets read, 0 packets written                                                                               SF enabled, 1 client, 138 packets read, 0 packets written                                                                               SF enabled, 1 client, 138 packets read, 0 packets written                                                                               SF enabled, 1 client, 138 packets read, 0 packets written                                                                               SF enabled, 1 client, 139 packets read, 0 packets written                                                                               SF enabled, 1 client, 139 packets read, 0 packets written                                                                               SF enabled, 1 client, 139 packets read, 0 packets written                                                                               SF enabled, 1 client, 140 packets read, 0 packets written                                                                               SF enabled, 1 client, 140 packets read, 0 packets written                                                                               SF enabled, 1 client, 140 packets read, 0 packets written                                                                               SF enabled, 1 client, 141 packets read, 0 packets written                                                                               SF enabled, 1 client, 141 packets read, 0 packets written                                                                               SF enabled, 1 client, 141 packets read, 0 packets written                                                                               SF enabled, 1 client, 142 packets read, 0 packets written                                                                               SF enabled, 1 client, 142 packets read, 0 packets written                                                                               SF enabled, 1 client, 142 packets read, 0 packets written                                                                               SF enabled, 1 client, 143 packets read, 0 packets written                                                                               SF enabled, 1 client, 143 packets read, 0 packets written                                                                               SF enabled, 1 client, 143 packets read, 0 packets written                                                                               SF enabled, 1 client, 144 packets read, 0 packets written                                                                               SF enabled, 1 client, 144 packets read, 0 packets written                                                                               SF enabled, 1 client, 144 packets read, 0 packets written                                                                               SF enabled, 1 client, 145 packets read, 0 packets written                                                                               SF enabled, 1 client, 145 packets read, 0 packets written                                                                               SF enabled, 1 client, 145 packets read, 0 packets written **************
-/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/data/
-**************
-**************
-**************
-**************
-**************
-**************
-Running SCP script: 
-scp -r /var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353/ jenismodi@netlab.encs.vancouver.wsu.edu:/var/www/web/users/elijah_houle@wsu.edu/jobs/job99_353**************
-Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB1 -r -e -I -p 
-Program: 
-**************
-**************
-upload null image
-**************
-Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB0 -r -e -I -p 
-Program: 
-**************
-**************
-upload null image
-**************
-Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB2 -r -e -I -p 
-Program: 
-**************
-**************
-upload null image
-**************
-Reprogramming 1
-Reprogramming 2
-Reprogramming 3
-**************
-**************
-/var/www/web/daemon/cents-daemon.pl ran @ Wed Apr 10 19:41:01 2013
-	Killed old job with jobID 99
-jobs-daemon finished.  operation took 24 seconds
-**************

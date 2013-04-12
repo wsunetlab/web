@@ -112,15 +112,16 @@ public class LoadPrograms {
 
 //		moteCommand = (CFLAGS.concat(transPower)).concat(("make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString())));
 	
-	
+	;
 	}else{
 	
 	pb = new ProcessBuilder("make","telosb","install."+moteIdList.get(i).toString(),"bsl,"+moteAddrList.get(i).toString());
       // 	moteCommand = "make telosb install.".concat(moteIdList.get(i).toString()).concat(" bsl,").concat(moteAddrList.get(i).toString());
 	}
 	pb.directory(moteProgDir);
-	moteProgProcess = pb.start();
 	
+	moteProgProcess = pb.start();
+	int shellExitStatus = moteProgProcess.waitFor();
 //	moteProgProcess = Runtime.getRuntime().exec(moteCommand, null,moteProgDir);
 
 	BufferedReader stdInput = new BufferedReader(new InputStreamReader(moteProgProcess.getInputStream()));
@@ -145,7 +146,7 @@ public class LoadPrograms {
 	
 }
 
-	String gatherCommand = "./GatherData.pl ".concat(Integer.toString(noOfMotes));
+	String gatherCommand = "/var/www/web/daemon/hellomote/GatherData.pl ".concat(Integer.toString(noOfMotes));
 	
 //	readDataProcess = Runtime.getRuntime().exec(gatherCommand, null,moteProgDir);
 //File apacheHtmlDir = new File("/var/www/web/html/");

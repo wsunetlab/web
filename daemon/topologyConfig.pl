@@ -45,29 +45,34 @@ print "Current directory:$path\n";
 my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/phidget21.jar Rotate $stepperSerial";
 #my $_HELLO = "perl helloProgram.pl $node";
 # TODO: You are suppose to send the power to get acknowledges by power. Modify the below _HELLO string to get the changes.
-my $_HELLO = "java hellomote.LoadPrograms $node";
+#my $_HELLO = "java hellomote.LoadPrograms $node";
+
+my $_HELLO = "java hellomote.LoadPrograms";
 #while (1) {
 $i = 0;
-while($i <= 2){
+while($i <= 1){
 #  print "$_ROTATE $d";
   print "Applied Degree : $d\n";
 	my $out1 = system("$_ROTATE $d");
 	
+sleep(10);
 #  my $out = system("$_ROTATE");
  print "Java output:$out1\n";
 #  print `$_ROTATE $d\n`;
-sleep(10);
   print "done rotating\n";
   @Lr = ();
   my $currentError = 0;
   # TODO: send hello message and collect acks;
   #  while (0) {
 # Run Hello world ack code 
-my $ackList = `$_HELLO $p`;
+#my $ackList = `$_HELLO $p`;
+
+chdir("/var/www/web/daemon") or die "$1";
+my $ackList = system("$_HELLO $p");
   
-#  sleep(10);
+  sleep(80);
   
-=for comment
+
   my @acks = split(',', $ackList);
 
   foreach my $ack (@acks) { # for each acknowledgement
@@ -95,7 +100,7 @@ my $ackList = `$_HELLO $p`;
       last; # break;
     }
   }
-=cut
+
 
  # }
 
