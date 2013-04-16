@@ -113,8 +113,10 @@ elsif ( $ARGV[0] eq "restart" ) {
 #               the ideal setup.
 #
 
-my $ourDB = DBI->connect($_DSN)
-  or die "Couldn't connect to database: $DBI::errstr\n";
+my $ourDB = DBI->connect($_DSN) or die "Couldn't connect to database: $DBI::errstr\n";
+
+#my $ourDB = DBI->connect('DBI:mysql:auth:host=netlab.encs.vancouver.wsu.edu','root','linhtinh');
+#  or die "Couldn't connect to database: $DBI::errstr\n";
 
 # Jenis Added. Date: Oct 9 2012
 # Use this code to rotate the stepper motor:
@@ -143,8 +145,9 @@ my $runningRoot =
   . $_JOBPLEASEDELETE
   . " and start <= NOW()) and pid!=0"
   . " or (state="
-  . $_JOBRUNNING
-  . my $runningQuery;
+  . $_JOBRUNNING;
+ 
+my $runningQuery;
 
 # 16 Oct 2003 : GWA : If we don't care whether or not it's finished don't add
 #               anything.
@@ -1309,8 +1312,8 @@ foreach my $currentJob (@jobArray) {
 
 			print "Total edges again :@{$edges{1}}\n";
 
-			`sudo chmod 666 /dev/ttyUSB*`;        # write permission for motes
-			`sudo chmod 666 /dev/bus/usb/*/*`;    # write permissions for usb
+		#	`sudo chmod 666 /dev/ttyUSB*`;        # write permission for motes
+		#	`sudo chmod 666 /dev/bus/usb/*/*`;    # write permissions for usb
 
 			# for each node, run the algorithm
 			foreach my $nodeId (@nodes) {
@@ -1348,24 +1351,25 @@ foreach my $currentJob (@jobArray) {
 				print "Lu: " . $Lu . "\n";
 
 				#print `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3`;
-		#	my $myTopOutput = system("/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3");
-	#			print "Topology Output: $myTopOutput \n";
+			my $myTopOutput = system("/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3");
+
+				sleep(250);
+				print "Topology Output: $myTopOutput \n";
 
 #print `./topologyConfig.pl $nodeId $stepperSerial $Lu`;
-				sleep(250);
 
-      my @algoResult = `./topologyConfig.pl 1 283607 2,3`; # apply algorithm
-    my $bestD = $algoResult[0]; # TODO: could also store these values in database from the topologyConfig script
-   my $bestP = $algoResult[1];
-my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
-   my @Lr = split(" ", $algoResult[2]);
+ #     my @algoResult = `./topologyConfig.pl 1 283607 2,3`; # apply algorithm
+#    my $bestD = $algoResult[0]; # TODO: could also store these values in database from the topologyConfig script
+#   my $bestP = $algoResult[1];
+#my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
+#   my @Lr = split(" ", $algoResult[2]);
 
 				# TODO: use values for error (put results into zip)
 			}
 		}
-	}
+#	}
 
-	#} #topologyPID loop ends
+	} #topologyPID loop ends
 	#$myFlag = 2;
 	#}
 
@@ -1457,7 +1461,7 @@ my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
 				print "before executing sfCommand\n";
 				print "**************\n";
 
-		#		exec("exec $sfCommand");
+				exec("exec $sfCommand");
 				print after;
 			}
 			my $updateMotesQuery =
@@ -1484,14 +1488,12 @@ my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
 
 # zone: this is fine since it checks for an entry in moteProgram before doing things
 
-	my $moteInfoQuery =
-	    "select moteid, comm_port from "
-	  . $_MOTEINFOTABLENAME
-	  . " where active=1";
+	my $moteInfoQuery ="select moteid, comm_port from ". $_MOTEINFOTABLENAME. " where active=1";
 	my $moteInfoStatement;
 	$moteInfoStatement = $ourDB->prepare($moteInfoQuery)
 	  or die "Couldn't prepare query `$moteInfoStatement': $DBI::errstr\n";
 	$moteInfoStatement->execute();
+	#or die "Unable to execute query $DBI::errstr\n";
 
 	my $dbLoggerConnectString;
 	while ( my $moteInfoRef = $moteInfoStatement->fetchrow_hashref() ) {
