@@ -1,0 +1,376 @@
+**************
+select files.path, files.name, files.user, files.type, files.id, jobfiles.moteid from files, jobfiles where jobfiles.jobid=113 and jobfiles.fileid = files.id and jobfiles.moteid = 0
+**************
+**************
+TestSerialMsg
+**************
+**************
+/var/www/web/users/elijah_houle@wsu.edu/upload/TestSerialMsg_20130422171009.class
+Java class name: TestSerialMsg
+**************
+/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430
+**************
+Current mote prog size:  219 219 219
+Current mote prog:3
+moteId:1
+**************
+ 219 219 219
+Current mote program : 4
+**************
+Test 1:219
+**************
+fileid 219
+**************
+**************
+setMoteId:/var/www/web/bin/set-mote-id --exe "/var/www/web/users/elijah_houle@wsu.edu/upload/this3main_top5_20130422170955.exe" "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/1.exe" 1**************
+**************
+Output:
+**************
+Avr root:/usr/bin/msp430-objcopy --output-target=ihex "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/1.exe" "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/1.ihex"
+**************
+**************
+moteProgram[1]:"/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/1.ihex"
+**************
+Added program /var/www/web/users/elijah_houle@wsu.edu/upload/this3main_top5_20130422170955.exe for mote #1
+
+**************
+Current mote prog:3
+moteId:2
+**************
+ 219 219 219
+Current mote program : 4
+**************
+Test 1:219
+**************
+fileid 219
+**************
+**************
+setMoteId:/var/www/web/bin/set-mote-id --exe "/var/www/web/users/elijah_houle@wsu.edu/upload/this3main_top5_20130422170955.exe" "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/2.exe" 2**************
+**************
+Output:
+**************
+Avr root:/usr/bin/msp430-objcopy --output-target=ihex "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/2.exe" "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/2.ihex"
+**************
+**************
+moteProgram[2]:"/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/2.ihex"
+**************
+Added program /var/www/web/users/elijah_houle@wsu.edu/upload/this3main_top5_20130422170955.exe for mote #1
+Added program /var/www/web/users/elijah_houle@wsu.edu/upload/this3main_top5_20130422170955.exe for mote #2
+
+**************
+Current mote prog:3
+moteId:3
+**************
+ 219 219 219
+Current mote program : 4
+**************
+Test 1:219
+**************
+fileid 219
+**************
+**************
+setMoteId:/var/www/web/bin/set-mote-id --exe "/var/www/web/users/elijah_houle@wsu.edu/upload/this3main_top5_20130422170955.exe" "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/3.exe" 3**************
+**************
+Output:
+**************
+Avr root:/usr/bin/msp430-objcopy --output-target=ihex "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/3.exe" "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/3.ihex"
+**************
+**************
+moteProgram[3]:"/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/3.ihex"
+**************
+Added program /var/www/web/users/elijah_houle@wsu.edu/upload/this3main_top5_20130422170955.exe for mote #1
+Added program /var/www/web/users/elijah_houle@wsu.edu/upload/this3main_top5_20130422170955.exe for mote #2
+Added program /var/www/web/users/elijah_houle@wsu.edu/upload/this3main_top5_20130422170955.exe for mote #3
+
+**************
+Current mote prog:3
+moteId:4
+**************
+ 219 219 219
+Current mote program : 4
+**************
+Test 1:
+currentMoteProg skipping ... 
+**************
+number of mote program 3
+**************
+**************
+ counting ...  
+**************
+moteid:1
+**************
+Reprogramming mote 1
+came in topology code at:1Going for Topology
+Node 1:1
+Node 2:2
+Total edges: 2
+Node 1:1
+Node 2:3
+Total edges: 2 3
+Total edges again :2 3
+Edges{nodeid} : ARRAY(0x99c8b1c) 
+Edges node id size : ARRAY(0x99c8b1c) 
+ConnectedNode: ARRAY(0x99c8b1c)
+Node Id: 1
+Stepper Serial:283607
+Lu: ARRAY(0x99c8b1c),
+**************
+ counting ...  
+**************
+moteid:2
+**************
+Reprogramming mote 2
+**************
+ counting ...  
+**************
+moteid:3
+**************
+Reprogramming mote 3
+ coming in topologyconfig.pl 
+Lu Size:2
+2
+3
+**************
+Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB1 -r -e -I -p 
+Program: "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/2.ihex"
+**************
+**************
+erase mote 
+**************
+Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB0 -r -e -I -p 
+Program: "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/1.ihex"
+**************
+**************
+erase mote 
+Current directory:/var/www/web/daemon
+Applied Degree : 20
+**************
+Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB2 -r -e -I -p 
+Program: "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/3.ihex"
+**************
+**************
+erase mote 
+*********** JAVA Rotate Program **************
+Connecting stepper phidget 283607...
+Connected: 283607
+**************
+upload new program
+Execute command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB0 -r -e -I -p  "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/1.ihex"**************
+upload new program
+Execute command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB2 -r -e -I -p  "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/3.ihex"**************
+upload new program
+Execute command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB1 -r -e -I -p  "/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/2.ihex"moteoutput:Reprogramming 1
+MSP430 Bootstrap Loader Version: 1.39-telos-8
+Use -h for help
+Mass Erase...
+Transmit default password ...
+Invoking BSL...
+Transmit default password ...
+Current bootstrap loader version: 1.61 (Device ID: f16c)
+Changing baudrate to 38400 ...
+Program ...
+0 bytes programmed.
+Reset device ...
+
+**************
+moteoutput:Reprogramming 2
+MSP430 Bootstrap Loader Version: 1.39-telos-8
+Use -h for help
+Mass Erase...
+Transmit default password ...
+Invoking BSL...
+Transmit default password ...
+Current bootstrap loader version: 1.61 (Device ID: f16c)
+Changing baudrate to 38400 ...
+Program ...
+0 bytes programmed.
+Reset device ...
+
+**************
+moteoutput:Reprogramming 3
+MSP430 Bootstrap Loader Version: 1.39-telos-8
+Use -h for help
+Mass Erase...
+Transmit default password ...
+Invoking BSL...
+Transmit default password ...
+Current bootstrap loader version: 1.61 (Device ID: f16c)
+Changing baudrate to 38400 ...
+Program ...
+0 bytes programmed.
+Reset device ...
+
+**************
+**************
+/usr/lib/jvm/java-6-openjdk/bin/java -cp /var/www/web/util/tinyos.jar net.tinyos.sf.SerialForwarder -comm serial@/dev/ttyUSB0:115200 -port 9001 -no-gui -quiet
+**************
+**************
+before executing sfCommand
+**************
+**************
+/usr/lib/jvm/java-6-openjdk/bin/java -cp /var/www/web/util/tinyos.jar net.tinyos.sf.SerialForwarder -comm serial@/dev/ttyUSB1:115200 -port 9002 -no-gui -quiet
+**************
+**************
+before executing sfCommand
+**************
+SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written **************
+/usr/lib/jvm/java-6-openjdk/bin/java -cp /var/www/web/util/tinyos.jar net.tinyos.sf.SerialForwarder -comm serial@/dev/ttyUSB2:115200 -port 9003 -no-gui -quiet
+**************
+**************
+before executing sfCommand
+**************
+SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written **************
+/usr/lib/jvm/java-6-openjdk/bin/jar cvf /var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/classes.jar -C /var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/jar/ TestSerialMsg.class 
+**************
+SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written                                                                               SF enabled, 0 clients, 0 packets read, 0 packets written **************
+/usr/lib/jvm/java-6-openjdk/bin/java -Xms2m -Xmx3m -cp /var/www/web/util/tinyos.jar:/var/www/web/util/mysql-connector-java-5.1.10-bin.jar:/var/www/web/util/dbDump.jar:.:/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/classes.jar dbDump --dbHost netlab.encs.vancouver.wsu.edu --dbPort 3306 --dbUser root --dbPassword linhtinh --dbNoTimestamp --dbTablePrefix this3motes_top5_430 --dbDatabase elijah_houle --redirect /var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/dblogger.log --verbose --classes TestSerialMsg 220  --connect 127.0.0.1:9001::1 127.0.0.1:9002::2 127.0.0.1:9003::3 
+**************
+**************
+/var/www/web/daemon/cents-daemon.pl ran @ Mon Apr 22 18:31:01 2013
+Started programming motes...
+Reprogramming 1
+MSP430 Bootstrap Loader Version: 1.39-telos-8
+Use -h for help
+Mass Erase...
+Transmit default password ...
+Invoking BSL...
+Transmit default password ...
+Current bootstrap loader version: 1.61 (Device ID: f16c)
+Changing baudrate to 38400 ...
+Program ...
+0 bytes programmed.
+Reset device ...
+Reprogramming 2
+MSP430 Bootstrap Loader Version: 1.39-telos-8
+Use -h for help
+Mass Erase...
+Transmit default password ...
+Invoking BSL...
+Transmit default password ...
+Current bootstrap loader version: 1.61 (Device ID: f16c)
+Changing baudrate to 38400 ...
+Program ...
+0 bytes programmed.
+Reset device ...
+Reprogramming 3
+MSP430 Bootstrap Loader Version: 1.39-telos-8
+Use -h for help
+Mass Erase...
+Transmit default password ...
+Invoking BSL...
+Transmit default password ...
+Current bootstrap loader version: 1.61 (Device ID: f16c)
+Changing baudrate to 38400 ...
+Program ...
+0 bytes programmed.
+Reset device ...
+
+Started new job with jobID 113
+jobs-daemon finished.  operation took 10 seconds
+**************
+                                                                              SF enabled, 0 clients, 1 packet read, 0 packets written                                                                               SF enabled, 0 clients, 1 packet read, 0 packets written                                                                               SF enabled, 0 clients, 1 packet read, 0 packets written                                                                               SF enabled, 0 clients, 2 packets read, 0 packets written                                                                               SF enabled, 0 clients, 2 packets read, 0 packets written                                                                               SF enabled, 0 clients, 2 packets read, 0 packets written                                                                               SF enabled, 0 clients, 3 packets read, 0 packets written                                                                               SF enabled, 0 clients, 3 packets read, 0 packets written                                                                               SF enabled, 0 clients, 3 packets read, 0 packets written                                                                               SF enabled, 0 clients, 4 packets read, 0 packets written                                                                               SF enabled, 0 clients, 4 packets read, 0 packets written                                                                               SF enabled, 0 clients, 4 packets read, 0 packets written                                                                               SF enabled, 0 clients, 5 packets read, 0 packets written                                                                               SF enabled, 0 clients, 5 packets read, 0 packets written                                                                               SF enabled, 0 clients, 5 packets read, 0 packets written                                                                               SF enabled, 0 clients, 6 packets read, 0 packets written                                                                               SF enabled, 0 clients, 6 packets read, 0 packets written                                                                               SF enabled, 0 clients, 6 packets read, 0 packets written Java output:0
+done rotating
+********Program Starts******
+                                                                              SF enabled, 1 client, 6 packets read, 0 packets written                                                                               SF enabled, 1 client, 6 packets read, 0 packets written                                                                               SF enabled, 1 client, 6 packets read, 0 packets written                                                                               SF enabled, 1 client, 7 packets read, 0 packets written                                                                               SF enabled, 1 client, 7 packets read, 0 packets written                                                                               SF enabled, 1 client, 7 packets read, 0 packets written                                                                               SF enabled, 1 client, 8 packets read, 0 packets written                                                                               SF enabled, 1 client, 8 packets read, 0 packets written                                                                               SF enabled, 1 client, 8 packets read, 0 packets written                                                                               SF enabled, 1 client, 9 packets read, 0 packets written                                                                               SF enabled, 1 client, 9 packets read, 0 packets written                                                                               SF enabled, 1 client, 9 packets read, 0 packets written                                                                               SF enabled, 1 client, 10 packets read, 0 packets written                                                                               SF enabled, 1 client, 10 packets read, 0 packets written                                                                               SF enabled, 1 client, 10 packets read, 0 packets written                                                                               SF enabled, 1 client, 11 packets read, 0 packets written                                                                               SF enabled, 1 client, 11 packets read, 0 packets written                                                                               SF enabled, 1 client, 11 packets read, 0 packets written A database connection has been established - Jenis
+Prepared Statement is not null - Jenis
+List added
+No of Motes: 3
+Null Program Installation:
+                                                                              SF enabled, 1 client, 12 packets read, 0 packets written                                                                               SF enabled, 1 client, 12 packets read, 0 packets written                                                                               SF enabled, 1 client, 13 packets read, 0 packets written                                                                               SF enabled, 1 client, 13 packets read, 0 packets written                                                                               SF enabled, 1 client, 14 packets read, 0 packets written                                                                               SF enabled, 1 client, 14 packets read, 0 packets written                                                                               SF enabled, 1 client, 15 packets read, 0 packets written                                                                               SF enabled, 1 client, 15 packets read, 0 packets written                                                                               SF enabled, 1 client, 16 packets read, 0 packets written                                                                               SF enabled, 1 client, 16 packets read, 0 packets written                                                                               SF enabled, 1 client, 17 packets read, 0 packets written                                                                               SF enabled, 1 client, 17 packets read, 0 packets written                                                                               SF enabled, 1 client, 18 packets read, 0 packets written                                                                               SF enabled, 1 client, 18 packets read, 0 packets written Exit status:1
+Output status:
+Error status:MSP430 Bootstrap Loader Version: 1.39-telos-8
+Mass Erase...
+
+An error occoured:
+device reports readiness to read but returned no data (device disconnected?)
+
+Null Program Installation:
+                                                                              SF enabled, 1 client, 19 packets read, 0 packets written                                                                               SF enabled, 1 client, 20 packets read, 0 packets written                                                                               SF enabled, 1 client, 21 packets read, 0 packets written                                                                               SF enabled, 1 client, 22 packets read, 0 packets written                                                                               SF enabled, 1 client, 23 packets read, 0 packets written                                                                               SF enabled, 1 client, 24 packets read, 0 packets written                                                                               SF enabled, 1 client, 25 packets read, 0 packets written Exit status:1
+Output status:
+Error status:MSP430 Bootstrap Loader Version: 1.39-telos-8
+Mass Erase...
+
+An error occoured:
+Timeout
+
+Null Program Installation:
+Exit status:1
+Output status:
+Error status:MSP430 Bootstrap Loader Version: 1.39-telos-8
+Mass Erase...
+
+An error occoured:
+device reports readiness to read but returned no data (device disconnected?)
+
+Mote Program Installation:
+cmg here after setting environment - Jenis
+cmg here after setting directory - Jenis
+cmg here after starting mote process - Jenis
+Exit status:2
+Response:
+Mote Program Installation:
+cmg here after setting environment - Jenis
+cmg here after setting directory - Jenis
+cmg here after starting mote process - Jenis
+Exit status:2
+Response:
+Mote Program Installation:
+cmg here after setting environment - Jenis
+cmg here after setting directory - Jenis
+cmg here after starting mote process - Jenis
+Exit status:2
+Response:
+Data read started; Here is the standard output of the command:
+
+
+serial@/dev/ttyUSB2:115200: resynchronising
+serial@/dev/ttyUSB0:115200: resynchronising
+serial@/dev/ttyUSB1:115200: resynchronising
+kill: No such process
+kill: No such process
+                                                                              SF enabled, 0 clients, 25 packets read, 0 packets written **************
+/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/data/
+**************
+**************
+**************
+**************
+**************
+**************
+Running SCP script: 
+scp -r /var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430/ jenismodi@netlab.encs.vancouver.wsu.edu:/var/www/web/users/elijah_houle@wsu.edu/jobs/job113_430**************
+Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB0 -r -e -I -p 
+Program: 
+**************
+**************
+upload null image
+**************
+Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB1 -r -e -I -p 
+Program: 
+**************
+**************
+upload null image
+**************
+Command : /usr/bin/tos-bsl --telosb -c /dev/ttyUSB2 -r -e -I -p 
+Program: 
+**************
+**************
+upload null image
+Exception in thread "Thread-0" java.lang.Exception: TOSComm JNI library runtime error: read: Resource temporarily unavailable
+	at net.tinyos.comm.TOSCommJNI.NativeSerial_read__SWIG_1(Native Method)
+	at net.tinyos.comm.NativeSerial.read(NativeSerial.java:195)
+	at net.tinyos.comm.TOSSerial$SerialInputStream.gather(TOSSerial.java:163)
+	at net.tinyos.comm.TOSSerial$SerialInputStream.available(TOSSerial.java:183)
+	at net.tinyos.packet.SerialByteSource.readByte(SerialByteSource.java:111)
+	at net.tinyos.packet.Packetizer.readFramedPacket(Packetizer.java:257)
+	at net.tinyos.packet.Packetizer.run(Packetizer.java:227)
+	at java.lang.Thread.run(Thread.java:679)
+**************
+Reprogramming 1
+Reprogramming 2
+Reprogramming 3
+**************
+**************
+/var/www/web/daemon/cents-daemon.pl ran @ Mon Apr 22 18:41:01 2013
+	Killed old job with jobID 113
+jobs-daemon finished.  operation took 31 seconds
+**************
