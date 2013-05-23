@@ -5,7 +5,7 @@
 
 #use strict;
 
-my $_PMAX = 31; # TODO: change if needed
+my $_PMAX = 5; # TODO: Right now set to max - change if needed; min val:1 and max val:31
 my $_PMIN = 1;
 my $_PDELTA = 1;
 
@@ -25,7 +25,9 @@ if (defined($userNodeList)) {
 } else {
   @Lu = (); # user wants this node to connect to no other nodes
 }
-
+foreach my $val (@Lu) {
+    print "$val\n";
+  }
 my $p = $_PMAX;
 my @Lr;
 my $bestError = $#Lu;
@@ -42,12 +44,17 @@ my $path = Cwd::cwd();
 print "Current directory:$path\n";
 #
 
-my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/phidget21.jar Rotate $stepperSerial";
+
+#my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/phidget21.jar Rotate $stepperSerial";
+# May 23 2013: phidget21.jar has been added to classpath, so no need to pass explicitly. 
+my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java Rotate $stepperSerial";
 #my $_HELLO = "perl helloProgram.pl $node";
 # TODO: You are suppose to send the power to get acknowledges by power. Modify the below _HELLO string to get the changes.
 #my $_HELLO = "java hellomote.LoadPrograms $node";
 
-my $_HELLO = "java hellomote.LoadPrograms";
+#my $_HELLO = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/mysql-connector-java-5.1.10-bin.jar hellomote.LoadPrograms";
+# May 23 2013: Mysql.jar has been added to classpath, so no need to pass explicitly. 
+my $_HELLO = "/usr/lib/jvm/java-6-openjdk/bin/java hellomote.LoadPrograms";
 #while (1) {
 $i = 0;
 while($i <= 1){
@@ -68,12 +75,14 @@ sleep(10);
 #my $ackList = `$_HELLO $p`;
 
 chdir("/var/www/web/daemon") or die "$1";
-my $ackList = system("$_HELLO $p");
-  
-  sleep(80);
+#my $ackList = system("$_HELLO $p");
+#print "Ack List Output: $ackList\n";
+#my $ackList = `$_HELLO $p`;  
+#  sleep(80);
+#print $ackList;
   
 
-  my @acks = split(',', $ackList);
+=pod  my @acks = split(',', $ackList);
 
   foreach my $ack (@acks) { # for each acknowledgement
     push(@Lr, $ack); # add sender to Lr
@@ -107,6 +116,7 @@ my $ackList = system("$_HELLO $p");
   $d += $_DTHETA;
   print "New Degree d: $d \n";
  # sleep(0);
+=cut
 $i++;
 }
 

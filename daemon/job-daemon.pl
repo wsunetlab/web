@@ -61,7 +61,7 @@ my $_JOBSTARTPROBLEM = 3;
 my $_JOBENDPROBLEM   = 4;
 my $_JOBPLEASEDELETE = 5;
 my $_MOTEREPROPORT   = 10001;
-
+print "Starting of Job daemon\n";
 #my $_MOTECOMMPORT = 10002;
 my $_MOTECOMMPORT = 115200;
 my $_MOTEPORTBASE = 9000;
@@ -90,16 +90,16 @@ my $doStop    = 0;
 my $doRestart = 0;
 
 if ( $ARGV[0] eq "start" ) {
-
+print "Argv equal to start\n";
 	# 16 Oct 2003 : GWA : This is the default
 }
 elsif ( $ARGV[0] eq "stop" ) {
-
+print "Argv equal to stop\n";
 	# 16 Oct 2003 : GWA : Stop any job currently running and exit.
 	$doStop = 1;
 }
 elsif ( $ARGV[0] eq "restart" ) {
-
+print "Argv equal to restart\n";
 	# 16 Oct 2003 : GWA : Stop any currently running jobs, marking the most
 	#               stopped as 'unstarted' and restart that job.
 	$doRestart = 1;
@@ -227,12 +227,14 @@ while ( my $runningRef = $runningStatement->fetchrow_hashref() ) {
 
 	# zone: I think the pid, powerpid, and duringrunpid stuff is allright
 
+	print "Killing Process by pid\n";
 	my $killCnt = kill 15, $runningRef->{'pid'};
 
 	# 30 Jan 2004 : GWA : Adding support for power manangement.
 
 	my $powerKillCnt = 0;
 	if ( $runningRef->{'powerpid'} != 0 ) {
+		print "killing process by powerpid\n";
 		$powerKillCnt = kill 15, $runningRef->{'powerpid'};
 	}
 
@@ -300,6 +302,7 @@ while ( my $runningRef = $runningStatement->fetchrow_hashref() ) {
 		# zone: only kill SFs for this job's motes
 		if ( defined( $currentMoteProg[ $moteBasicRef->{'moteid'} ] ) ) {
 			if ( $moteBasicRef->{'sf_pid'} != 0 ) {
+				print "killing process by sf_pid\n";
 				$sfKillCnt = kill 15, $moteBasicRef->{'sf_pid'};
 			}
 
@@ -389,6 +392,7 @@ if ( $numberRunning == 0 && $_DAEMONSUPPORT != 0 ) {
 			|| ( $pendingStatement->rows > 0 )
 		  )
 		{
+			print "killing process by dbloggerpid\n";
 			my $killCnt = kill 15, $daemonInfoRef->{'dbloggerpid'};
 			if ( $daemonInfoRef->{'duringrunpid'} != 0 ) {
 				$killCnt = kill 15, $daemonInfoRef->{'duringrunpid'};
@@ -414,6 +418,7 @@ if ( $numberRunning == 0 && $_DAEMONSUPPORT != 0 ) {
 			{
 				if ( $moteBasicRef->{'sf_pid'} != 0 ) {
 					$sfKillCnt = kill 15, $moteBasicRef->{'sf_pid'};
+					print "Killing sf_pid jobs\n";
 				}
 				if ( $sfKillCnt != 0 ) {
 					push( @jobPIDs, $moteBasicRef->{'sf_pid'} );
@@ -510,7 +515,7 @@ if ($needClear) {
 # DATA COLLECTION
 
 foreach my $lastRunningRef (@runningRefs) {
-
+print "called in data collection\n";
 # zone: this needs to be done for each job we stop above, so instead of lastRunningRef we should have an array of all the old jobs
 
 	# 19 Oct 2003 : GWA : Get more, important info about the job we stopped.
@@ -1138,7 +1143,7 @@ foreach my $currentJob (@jobArray) {
 		}
 
 		# 31 Aug 2003 : GWA : Actually run the command and log output.
-		#print "$avrRoot\n";
+		print "Avr root:$avrRoot\n";
 		print "**************\n";
 		print `$avrRoot 2>&1 >> $_AVROBJCOPYLOGFILE`;
 		print "**************\n";
@@ -1225,11 +1230,14 @@ foreach my $currentJob (@jobArray) {
 	#my $topologyPID = fork();
 
 	#if($topologyPID == 0){
-	print "came in topology code at:1";
+
+# set topology id to database table first time only and other times set it to 0. 
+print "starting at topology code\n";
 	my $topologyId;
+	my $topology_run_flag;
 
 	my $topologyIdQuery =
-	    "select topologyId from "
+	    "select topology_flag,topologyId from "
 	  . $_JOBSCHEDULETABLENAME
 	  .                         # get topologyId associated with job
 	  " where id=" . $jobID;    # unique id
@@ -1240,15 +1248,19 @@ foreach my $currentJob (@jobArray) {
 	$topologyIdStatement->execute();
 
 	if ( my $topologyIdRef = $topologyIdStatement->fetchrow_hashref() ) {
-		$topologyId =
-		  $topologyIdRef->{'topologyId'}; # assign to topologyId (might be null)
+		$topologyId = $topologyIdRef->{'topologyId'}; # assign to topologyId (might be null)
+		$topology_run_flag = $topologyIdRef->{'topology_flag'}; #get topology flag (useful to know if topology code has alreday run once. default value is "1", once topology code has run, set this value to "0" in jobschedule table;
 	}
 
 	if ( defined($topologyId) )
 	{ # if topologyId not null, then job uses a topology, and so parse and run the algorithm
-
-		my $topologyPID = fork();
-		if ( $topologyPID == 0 ) {
+#check if flag is not 0, if flag is non-zero that means topology code has not run before. 
+	if($topology_run_flag != "0"){
+	#	my $topologyPID = fork();
+	
+	#	if ( $topologyPID == 0 ) {
+		
+	print "came in topology code at:1";
 			my $dbEdges;
 			my $dbNodes;
 
@@ -1276,22 +1288,19 @@ foreach my $currentJob (@jobArray) {
 # (so that it's already in a format for the algorithm)
 
 			# parse nodes
-			my @nodeStrings = split( /\|/, $dbNodes )
-			  ;    # split nodes on "|" to get individual nodes
+			my @nodeStrings = split( /\|/, $dbNodes );    # split nodes on "|" to get individual nodes
 			my @nodes = ();    # nodeIds
 			foreach my $node (@nodeStrings) {
 				my @nodeSplit =
 				  split( ",", $node );    # split individual node data on ","
-				my $nodeId =
-				  substr( $nodeSplit[0], 1 );    # offset by 1 to ignore "("
+				my $nodeId = substr( $nodeSplit[0], 1 );    # offset by 1 to ignore "("
 				push( @nodes, $nodeId );         # push nodeId onto nodes
 			}
 
 			# parse edges
 			my %edges = ();                      # hash of edges
 			foreach my $nodeId (@nodes) {
-				$edges{$nodeId} =
-				  ();    # map each node to an adjacency array (initialize here)
+				$edges{$nodeId} = ();    # map each node to an adjacency array (initialize here)
 			}
 			my @edgeStrings = split( /\|/, $dbEdges )
 			  ;          # split edges on "|" to get individual edges
@@ -1353,8 +1362,8 @@ foreach my $currentJob (@jobArray) {
 				#print `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3`;
 			my $myTopOutput = system("/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3");
 
-				sleep(250);
-				print "Topology Output: $myTopOutput \n";
+				sleep(30);
+#				print "Topology Output: $myTopOutput \n";
 
 #print `./topologyConfig.pl $nodeId $stepperSerial $Lu`;
 
@@ -1366,10 +1375,21 @@ foreach my $currentJob (@jobArray) {
 
 				# TODO: use values for error (put results into zip)
 			}
-		}
+#		}
 #	}
 
-	} #topologyPID loop ends
+	# set flag to '0'. 
+	my $flagUpdateQuery = "update ". $_JOBSCHEDULETABLENAME
+                          . " set topology_flag='0' where id="
+                          . $jobID;
+        my $flagUpdateStatement;
+        $flagUpdateStatement = $ourDB->prepare($flagUpdateQuery)
+            or die
+        "Couldn't prepare query '$flagUpdateStatement': $DBI::errstr\n";
+        $flagUpdateStatement->execute();	
+	} #topology_flag_run check loop ends here
+#	} #fork topologyPID loop ends
+}
 	#$myFlag = 2;
 	#}
 
@@ -1439,10 +1459,10 @@ foreach my $currentJob (@jobArray) {
 	# SerialForwarder should moved down after reprogramming the motes
 	# my $sfPID;
 	while ( my $moteBasicRef = $moteBasicStatement->fetchrow_hashref() ) {
-
+print "cmg in first loop\n";
 		# zone: this should be done only for the current job's motes
 		if ( defined( $currentMoteProg[ $moteBasicRef->{'moteid'} ] ) ) {
-
+print "cmg in second loop\n";
 	#   my $sfCommand = "$_EXTERNALSF -comm serial\@$moteBasicRef->{'ip_addr'}:"
 	#                  . "$_MOTECOMMPORT -port $moteBasicRef->{'comm_port'}" .
 	#                 " -no-gui -quiet";
@@ -1456,11 +1476,13 @@ foreach my $currentJob (@jobArray) {
 			print "**************\n";
 
 			$sfPID = fork();
+print "sfPID:$sfPID\n";
 			if ( $sfPID == 0 ) {
-				print before print "**************\n";
+				print before;
+				print "**************\n";
 				print "before executing sfCommand\n";
 				print "**************\n";
-
+# Serial forwarder getting executed here
 				exec("exec $sfCommand");
 				print after;
 			}
@@ -1685,10 +1707,13 @@ if ( $oldJob || $newJob ) {
 	print $outputStart;
 	print "**************\n";
 }
-
+print "cmg here to exit\n";
 exit(0);
 
 sub doProgram {
+
+# shift returns arguments passed from doProgram caller. 
+
 	my $moteID      = shift;
 	my $moteProgram = shift;
 
@@ -1742,8 +1767,11 @@ sub doProgram {
 		  . $moteAddress
 		  . " -r -e -I -p "
 		  . $_ERASE;
-		$moteOutput .= `$nullCommand`;
-
+		print "NullCommand:$nullCommand\n";	
+	$moteOutput .= `$nullCommand`;
+#	system($nullCommand);
+	print "Moteoutput:$moteOutput\n";
+#	sleep(5);
 	  #my $eraseCommand = $_REMOTEUISP . " --telosb -c " .$moteAddress . " -e ";
 	  #    $moteOutput .= `$runRoot --upload if=main.srec 2>&1`;
 	  #	$moteOutput .= $runRoot;
