@@ -64,8 +64,10 @@ my $_JOBPLEASEDELETE = 5;
 my $_MOTEREPROPORT   = 10001;
 
 print "Starting of Job daemon:";
-print DateTime->now()->strftime("%a, %d %b %Y %H:%M:%S %z");
-print "\n";
+#print DateTime->now()->strftime("%a, %d %b %Y %H:%M:%S %z");
+#print "\n";
+use POSIX qw(strftime);
+print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
 
 #my $_MOTECOMMPORT = 10002;
 my $_MOTECOMMPORT = 115200;
@@ -344,7 +346,7 @@ while ( my $runningRef = $runningStatement->fetchrow_hashref() ) {
 	$i++;
 	push( @runningRefs, $runningRef );
 }
-
+# runninf ref big loop ends here
 # 30 Apr 2004 : GWA : <Sigh>.  We've got to do this up here as well, just to
 #               see if we need to shut the daemon down.
 
@@ -1483,7 +1485,8 @@ print "cmg in second loop\n";
 			print "**************\n";
 
 			$sfPID = fork();
-print "sfPID:$sfPID\n";
+			print "sfPID:$sfPID\n";
+			#check somewhere here for serial forward repeaters - Jenis
 			if ( $sfPID == 0 ) {
 				print before;
 				print "**************\n";

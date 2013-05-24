@@ -71,35 +71,3 @@ while (my $moteRunRef = $moteStatement->fetchrow_hashref()) {
         my $nullProgramCommand = "make telosb install.".$moteRunRef->{'moteid'}." bsl,".$moteRunRef->{'ip_addr'};
         $nullProgOutput2 .=`$nullProgramCommand`;
 }
-#print "Null Prog output:$nullProgOutput2\n";
-
-#print "Output:$moteOutput\n";
-
-#my $i;
-#for($i=0;$i<2;$i++){
-
-#chdir($nullPath) or die "cant chnge directory\n";
-#my $nullProgramCommand = "make telosb install.".$i." bsl,"."/dev/ttyUSB".$i;
-#print "Null program : $nullProgramCommand\n";
-#$moteOutput .= `$nullProgramCommand`;
-#}
-
-#for($i=0;$i<2;$i++){
-
-#chdir($appPath) or die "cant change directory\n";
-#my $appProgramCommand = "make telosb install.".$i." bsl,"."/dev/ttyUSB".$i;
-#print "App program : $appProgramCommand\n";
-#$moteOutput .= `$appProgramCommand`;
-#}
-
-#for($i=0;$i<2;$i++){
-
-#chdir($nullPath) or die "cant chnge directory\n";
-#my $nullProgramCommand = "make telosb install.".$i." bsl,"."/dev/ttyUSB".$i;
-#print "Null program : $nullProgramCommand\n";
-#$moteOutput .= `$nullProgramCommand`;
-#}
-
-#}
-
-
