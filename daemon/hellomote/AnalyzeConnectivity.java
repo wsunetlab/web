@@ -128,7 +128,7 @@ public class AnalyzeConnectivity {
 //		System.out.println("StringTokenizer:"+stringTokenizer);
 		int i = 0;
 		
-		tokenArray = new String[12];
+		tokenArray = new String[13];
 	
 		while (stringTokenizer.hasMoreElements()) {
 			tokenArray[i] = (String) stringTokenizer.nextElement();
@@ -139,7 +139,10 @@ public class AnalyzeConnectivity {
 		String msg_hex = tokenArray[8].concat(tokenArray[9]);
 		int msg_decimal = Integer.parseInt(msg_hex, 16);
 		int receiver_node = Integer.parseInt(tokenArray[4]);
-		int sender_node = Integer.parseInt(tokenArray[tokenArray.length - 1]);
+	//	int sender_node = Integer.parseInt(tokenArray[tokenArray.length - 1]);
+
+		//TODO	
+		int sender_node = Integer.parseInt(tokenArray[10]);
 
 //		System.out.println("Msg Decimal:"+msg_decimal);
 //		System.out.println("Sender Node:"+sender_node);
@@ -184,19 +187,22 @@ public class AnalyzeConnectivity {
 //			 linkQualityTableStat.executeUpdate("insert into auth.linkQuality"+"(send_addr,PRR,rec_addr) values ("+Integer.toString(i)+","+prr[i][j]+","+Integer.toString(j)+")");
 
 			 linkQualityTableStat.executeUpdate("insert into auth.linkQuality"+"(send_addr,PRR,rec_addr) values ("+Integer.toString(moteI)+","+prr[i][j]+","+Integer.toString(moteJ)+")");
-		/*	System.out.println("Sender: "+ moteI+ " Receiver: "
+			System.out.println("Sender: "+ moteI+ " Receiver: "
 					+ moteJ+ " Actual Number of Msg Received: "
 					+ totalMsgFromSToR[moteI][moteJ]
 					+ " Expected Number of Msg Received: "
 					+ (maxMsgFromSToR[moteI][moteJ]
 					- minMsgFromSToR[moteI][moteJ] + 1)
 					+ " Packet reception Ratio: "
-					+ prr[i][j] + "%");*/
+					+ prr[i][j] + "%");
 					}
 				}
 			} 
 	} catch (Exception e) {
+			e.printStackTrace();
 			System.err.println("Error: " + e);
+			System.out.println("Error:"+e.getMessage());
+			
 	}
 
 }

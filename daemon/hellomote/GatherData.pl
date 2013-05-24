@@ -21,14 +21,15 @@ while(my $moteListRef = $moteListStatement->fetchrow_hashref()){
 #for($i = 0; $i < $numMotes; $i++){
 my $commandString;
 my $run_result;
-	$commandString = "java net.tinyos.tools.Listen -comm serial@".$moteListRef->{'ip_addr'}.":telos > USB".$moteListRef->{'moteid'}."Data.txt &";
+
+$commandString = "/usr/lib/jvm/java-6-openjdk/bin/java -cp /var/www/web/util/tinyos.jar net.tinyos.tools.Listen -comm serial@".$moteListRef->{'ip_addr'}.":telos > USB".$moteListRef->{'moteid'}."Data.txt &";
 	$run_result = `$commandString`;
 	#print "$commandString\n";
 #}
 }
-sleep(10);
+sleep(20);
 
-my $GetProcessId = `ps -ef | grep "java net.tinyos.tools.Listen" | awk '{print \$2}'  > processes.txt`;
+my $GetProcessId = `ps -ef | grep "net.tinyos.tools.Listen" | awk '{print \$2}'  > processes.txt`;
 my $process_id;
 open FILE, "processes.txt" or die $!;
 
@@ -40,7 +41,7 @@ while($process_id = <FILE>){
 my $AnalyzeConnectivity;
 my $run_analyze;
 chdir('/var/www/web/daemon/') or die "$!";
-$AnalyzeConnectivity = "java hellomote.AnalyzeConnectivity";
+$AnalyzeConnectivity = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/mysql-connector-java-5.1.10-bin.jar hellomote.AnalyzeConnectivity";
 $run_analyze = `$AnalyzeConnectivity`;
 print "$run_analyze\n";
 #sleep(40);
