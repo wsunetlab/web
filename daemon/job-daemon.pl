@@ -22,6 +22,7 @@ use DBI;
 use strict;
 use Thread;
 use File::Path;
+use DateTime;
 
 #
 # CONSTANTS
@@ -61,7 +62,11 @@ my $_JOBSTARTPROBLEM = 3;
 my $_JOBENDPROBLEM   = 4;
 my $_JOBPLEASEDELETE = 5;
 my $_MOTEREPROPORT   = 10001;
-print "Starting of Job daemon\n";
+
+print "Starting of Job daemon:";
+print DateTime->now()->strftime("%a, %d %b %Y %H:%M:%S %z");
+print "\n";
+
 #my $_MOTECOMMPORT = 10002;
 my $_MOTECOMMPORT = 115200;
 my $_MOTEPORTBASE = 9000;
@@ -1324,8 +1329,9 @@ print "starting at topology code\n";
 		#	`sudo chmod 666 /dev/ttyUSB*`;        # write permission for motes
 		#	`sudo chmod 666 /dev/bus/usb/*/*`;    # write permissions for usb
 
-			# for each node, run the algorithm
-			foreach my $nodeId (@nodes) {
+			# for each node, run the algorithm (right nw run once : May 23
+		#	foreach my $nodeId (@nodes) {
+				my $nodeId = 1;
 				my $stepperSerial;
 				my $stepperQuery =
 				  "select stepper_serial from motes where moteid = "
@@ -1359,10 +1365,11 @@ print "starting at topology code\n";
 				print "Stepper Serial:" . $stepperSerial . "\n";
 				print "Lu: " . $Lu . "\n";
 
-				#print `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3`;
-			my $myTopOutput = system("/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3");
+				print `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3`;
+		#	my $myTopOutput = system("/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3");
 
-				sleep(30);
+		#		sleep(30);
+			sleep(30);
 #				print "Topology Output: $myTopOutput \n";
 
 #print `./topologyConfig.pl $nodeId $stepperSerial $Lu`;
@@ -1389,7 +1396,7 @@ print "starting at topology code\n";
         $flagUpdateStatement->execute();	
 	} #topology_flag_run check loop ends here
 #	} #fork topologyPID loop ends
-}
+#}
 	#$myFlag = 2;
 	#}
 

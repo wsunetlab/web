@@ -54,12 +54,15 @@ my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java Rotate $stepperSerial";
 
 #my $_HELLO = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/mysql-connector-java-5.1.10-bin.jar hellomote.LoadPrograms";
 # May 23 2013: Mysql.jar has been added to classpath, so no need to pass explicitly. 
-my $_HELLO = "/usr/lib/jvm/java-6-openjdk/bin/java hellomote.LoadPrograms";
+#my $_HELLO = "/usr/lib/jvm/java-6-openjdk/bin/java hellomote.LoadPrograms";
+#my $_HELLO = "perl LoadPrograms.pl";
+my $_HELLO = "/bin/bash envsetup.sh";  
 #while (1) {
 $i = 0;
 while($i <= 1){
 #  print "$_ROTATE $d";
   print "Applied Degree : $d\n";
+chdir("/var/www/web/daemon") or die "$1";
 	my $out1 = system("$_ROTATE $d");
 	
 sleep(10);
@@ -74,15 +77,17 @@ sleep(10);
 # Run Hello world ack code 
 #my $ackList = `$_HELLO $p`;
 
-chdir("/var/www/web/daemon") or die "$1";
-#my $ackList = system("$_HELLO $p");
+chdir("/var/www/web/daemon/hellomote") or die "$1";
+my $ackList = `$_HELLO $p`;
+
+sleep(30);
 #print "Ack List Output: $ackList\n";
 #my $ackList = `$_HELLO $p`;  
 #  sleep(80);
 #print $ackList;
   
 
-=pod  my @acks = split(',', $ackList);
+  my @acks = split(',', $ackList);
 
   foreach my $ack (@acks) { # for each acknowledgement
     push(@Lr, $ack); # add sender to Lr
@@ -116,7 +121,7 @@ chdir("/var/www/web/daemon") or die "$1";
   $d += $_DTHETA;
   print "New Degree d: $d \n";
  # sleep(0);
-=cut
+
 $i++;
 }
 
