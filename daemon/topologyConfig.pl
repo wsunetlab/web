@@ -4,7 +4,8 @@
 # 0.0 <= p <= 1.0
 
 #use strict;
-
+use DateTime;
+use POSIX qw(strftime);
 my $_PMAX = 5; # TODO: Right now set to max - change if needed; min val:1 and max val:31
 my $_PMIN = 1;
 my $_PDELTA = 1;
@@ -18,7 +19,10 @@ my $userNodeList = $ARGV[2];
 
 my @Lu;
 #my $Lu;
-print " coming in topologyconfig.pl \n";
+print "File started Here (TopologyConfig.pl), Time of Start:";
+#print DateTime->now()->strftime("%a, %d %b %Y %H:%M:%S %z");
+print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
+print "\n";
 if (defined($userNodeList)) {
   @Lu = split(',', $userNodeList);
   print "Lu Size:", scalar @Lu ,"\n";
@@ -45,9 +49,9 @@ print "Current directory:$path\n";
 #
 
 
-#my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/phidget21.jar Rotate $stepperSerial";
+my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/phidget21.jar Rotate $stepperSerial";
 # May 23 2013: phidget21.jar has been added to classpath, so no need to pass explicitly. 
-my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java Rotate $stepperSerial";
+#my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java Rotate $stepperSerial";
 #my $_HELLO = "perl helloProgram.pl $node";
 # TODO: You are suppose to send the power to get acknowledges by power. Modify the below _HELLO string to get the changes.
 #my $_HELLO = "java hellomote.LoadPrograms $node";
@@ -80,7 +84,7 @@ sleep(10);
 chdir("/var/www/web/daemon/hellomote") or die "$1";
 my $ackList = `$_HELLO $p`;
 
-sleep(30);
+sleep(20);
 #print "Ack List Output: $ackList\n";
 #my $ackList = `$_HELLO $p`;  
 #  sleep(80);
@@ -129,3 +133,8 @@ $i++;
 print "Best Degree D :$bestD\n";
 print "Best Tranmission Power P: $bestP\n";
 print "New Node List: @Lr\n";
+
+print "End time:";
+#print DateTime->now()->strftime("%a, %d %b %Y %H:%M:%S %z");
+print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
+print "\n";
