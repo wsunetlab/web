@@ -63,6 +63,12 @@ my $_JOBENDPROBLEM   = 4;
 my $_JOBPLEASEDELETE = 5;
 my $_MOTEREPROPORT   = 10001;
 
+
+my $_TOPOLOGYPENDING = 0;
+my $_TOPOLOGYRUNNING = 1;
+my $_TOPOLOGYFINISHED = 2;
+
+
 print "Starting of Job daemon:";
 #print DateTime->now()->strftime("%a, %d %b %Y %H:%M:%S %z");
 #print "\n";
@@ -122,8 +128,28 @@ print "Argv equal to restart\n";
 
 my $ourDB = DBI->connect($_DSN) or die "Couldn't connect to database: $DBI::errstr\n";
 
-#my $ourDB = DBI->connect('DBI:mysql:auth:host=netlab.encs.vancouver.wsu.edu','root','linhtinh');
-#  or die "Couldn't connect to database: $DBI::errstr\n";
+# 29 May 2013: Jenis : Code to postpone job-daemon if topology code already running - Hack
+
+my $top_process_id;
+my $GetProcessId = `ps -ef | grep "topologyConfig.pl" | awk '{print \$2}'  > top_processes.txt`;
+my @topProcessArray;
+
+open FILE, "top_processes.txt" or die $!;
+while($top_process_id = <FILE>){
+        chomp($top_process_id);
+        push(@topProcessArray, $top_process_id);
+}
+my $topArraySize = scalar(@topProcessArray);
+print "Process size:$topArraySize\n";
+if($topArraySize >= 3){
+print "cmg in condition";
+exit(0);
+}
+#print "size of array:".scalar(@processArray)."\n";
+
+
+#29 May 2013: Jenis: Postpone code ends here.
+
 
 # Jenis Added. Date: Oct 9 2012
 # Use this code to rotate the stepper motor:
@@ -199,6 +225,8 @@ my @runningRefs;
 
 while ( my $runningRef = $runningStatement->fetchrow_hashref() ) {
 
+print "Checking for old jobs\n";
+print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
 	# 18 Aug 2003 : GWA : Mark that we had an old job.
 
 	$oldJob = 1;
@@ -215,6 +243,7 @@ while ( my $runningRef = $runningStatement->fetchrow_hashref() ) {
 	#      ($i == $numberRunning - 1)) {
 	if ($doRestart) {
 		$nextState = $_JOBPENDING;
+#comes in only when job has got some problem in running otherwise nextstate would be $_JOBFINISHED. 
 	}
 
 	my $updateQuery =
@@ -241,7 +270,7 @@ while ( my $runningRef = $runningStatement->fetchrow_hashref() ) {
 
 	my $powerKillCnt = 0;
 	if ( $runningRef->{'powerpid'} != 0 ) {
-		print "killing process by powerpid\n";
+		print "Killing process by powerpid\n";
 		$powerKillCnt = kill 15, $runningRef->{'powerpid'};
 	}
 
@@ -309,7 +338,7 @@ while ( my $runningRef = $runningStatement->fetchrow_hashref() ) {
 		# zone: only kill SFs for this job's motes
 		if ( defined( $currentMoteProg[ $moteBasicRef->{'moteid'} ] ) ) {
 			if ( $moteBasicRef->{'sf_pid'} != 0 ) {
-				print "killing process by sf_pid\n";
+				print "Killing process by sf_pid\n";
 				$sfKillCnt = kill 15, $moteBasicRef->{'sf_pid'};
 			}
 
@@ -346,7 +375,7 @@ while ( my $runningRef = $runningStatement->fetchrow_hashref() ) {
 	$i++;
 	push( @runningRefs, $runningRef );
 }
-# runninf ref big loop ends here
+# running ref big loop ends here
 # 30 Apr 2004 : GWA : <Sigh>.  We've got to do this up here as well, just to
 #               see if we need to shut the daemon down.
 
@@ -373,6 +402,8 @@ my $needClear = 0;
 
 # 30 Apr 2004 : GWA : Look for running daemons.
 if ( $numberRunning == 0 && $_DAEMONSUPPORT != 0 ) {
+	print "Looking for running daemons:";
+	print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
 	my $daemonInfoQuery =
 	    "select id, postprocess, duringrunpid,"
 	  . " UNIX_TIMESTAMP(lastran) as unixran,"
@@ -384,22 +415,16 @@ if ( $numberRunning == 0 && $_DAEMONSUPPORT != 0 ) {
 	  or die "Couldn't prepare query `$daemonInfoQuery': $DBI::errstr\n";
 	$daemonInfoStatement->execute();
 	if ( $daemonInfoStatement->rows != 0 ) {
+	print "daemon rows are not zero\n";
 		my $daemonInfoRef = $daemonInfoStatement->fetchrow_hashref();
 
 		# 30 Apr 2004 : GWA : Kill if it's done or there's another job about to
 		#               run.
 
-		if (
-			(
-				(
-					$daemonInfoRef->{'unixran'} +
-					( 60 * $daemonInfoRef->{'crontime'} )
-				) < $timeStart
-			)
-			|| ( $pendingStatement->rows > 0 )
-		  )
+		if ((($daemonInfoRef->{'unixran'} +( 60 * $daemonInfoRef->{'crontime'} )) < $timeStart)
+			|| ( $pendingStatement->rows > 0 ))
 		{
-			print "killing process by dbloggerpid\n";
+			print "Killing process by dbloggerpid\n";
 			my $killCnt = kill 15, $daemonInfoRef->{'dbloggerpid'};
 			if ( $daemonInfoRef->{'duringrunpid'} != 0 ) {
 				$killCnt = kill 15, $daemonInfoRef->{'duringrunpid'};
@@ -437,7 +462,7 @@ if ( $numberRunning == 0 && $_DAEMONSUPPORT != 0 ) {
 				    $daemonInfoRef->{'postprocess'} . " "
 				  . $daemonInfoRef->{'cacheddb'};
 				print "************\n";
-				print $postProcessCmd;
+				print "Post process cmd:$postProcessCmd";
 				print "**************\n";
 				my $postProcessPID = fork();
 				if ( $postProcessPID == 0 ) {
@@ -462,7 +487,7 @@ if ( $numberRunning == 0 && $_DAEMONSUPPORT != 0 ) {
 			$updateStatement->execute();
 		}
 	}
-}
+} #big loop ends here
 
 # 02 Sep 2003 : GWA : Give things a minute to die.
 
@@ -475,6 +500,7 @@ if ($oldJob) {
 
 my $foundLaggart = 0;
 foreach my $currentPID (@jobPIDs) {
+print "Found Laggart\n";
 	if ( kill( 0, $currentPID ) ) {
 		$outputStart .= "\tJob with PID $currentPID needed help dying!\n";
 		kill 9, $currentPID;
@@ -522,7 +548,8 @@ if ($needClear) {
 # DATA COLLECTION
 
 foreach my $lastRunningRef (@runningRefs) {
-print "called in data collection\n";
+print "called in data collection:";
+print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
 # zone: this needs to be done for each job we stop above, so instead of lastRunningRef we should have an array of all the old jobs
 
 	# 19 Oct 2003 : GWA : Get more, important info about the job we stopped.
@@ -560,7 +587,7 @@ print "called in data collection\n";
 
 	my $dirName = $_JOBDATAROOT . $lastRunningRef->{'jobtempdir'} . "/data/";
 	print "**************\n";
-	print $dirName . "\n";
+	print "Dir Name:$dirName\n";
 	print "**************\n";
 
 	mkpath($dirName);
@@ -697,6 +724,7 @@ print "called in data collection\n";
 }
 
 if ($doStop) {
+	print "doStop called\n";
 	goto FINISH;
 }
 
@@ -726,7 +754,7 @@ $missedStatement->execute();
 
 my $missedRef;
 while ( $missedRef = $missedStatement->fetchrow_hashref() ) {
-
+print "we missed running some jobs\n";
 	my $updateQuery =
 	    "update "
 	  . $_JOBSCHEDULETABLENAME
@@ -858,6 +886,8 @@ if ( $blahStatement->rows == 0 && $pendingCount == 0 && $_DAEMONSUPPORT != 0 ) {
 # zone: this should more or less be done in a loop for each pending job
 
 foreach my $currentJob (@jobArray) {
+	print "Retrieve info and run job:";
+	print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
 	my $jobID    = $currentJob->{'id'};
 	my $jobJobID = $currentJob->{'jobid'};
 	$newJob = 1;
@@ -998,7 +1028,7 @@ foreach my $currentJob (@jobArray) {
 	  . " and jobfiles.moteid = 0";
 
 	print "**************\n";
-	print $classQuery . "\n";
+	print "Class Query:$classQuery\n";
 	print "**************\n";
 
 	my $classStatement;
@@ -1021,7 +1051,7 @@ foreach my $currentJob (@jobArray) {
 		#$javawError =~ /wrong name: (.*)\)/;
 		my $javaClassName = $classRef->{name};
 		print "**************\n";
-		print $javaClassName . "\n";
+		print "Java class Name:$javaClassName\n";
 		print "**************\n";
 		$javaClassName =~ s/\//\./g;
 
@@ -1371,7 +1401,7 @@ print "starting at topology code\n";
 		#	my $myTopOutput = system("/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3");
 
 		#		sleep(30);
-			sleep(30);
+			#sleep(30);
 #				print "Topology Output: $myTopOutput \n";
 
 #print `./topologyConfig.pl $nodeId $stepperSerial $Lu`;
@@ -1708,8 +1738,8 @@ if ( $oldJob == 1 && $newJob == 0 && $pendingStatement->rows == 0 ) {
 	print $programmingOutput;
 	print "**************\n";
 }
-
 if ( $oldJob || $newJob ) {
+
 	my $diff = time() - $timeStart;
 	$outputStart .=
 	  "jobs-daemon finished.  operation took " . $diff . " seconds\n";

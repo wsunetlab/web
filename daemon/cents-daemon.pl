@@ -13,6 +13,8 @@ use Fcntl qw(:DEFAULT :flock);
 
 require "sitespecific.pl";
 
+print "Called in cents-daemon pl file\n";
+
 our ($_JOBSCHEDULETABLENAME, $_DSN, $_JOBSTABLENAME,
 $_JOBFILESTABLENAME, $_FILESTABLENAME, $_USERROOT,
 $_MOTEINFOTABLENAME, $_SETMOTEID, $_AVROBJCOPY, $_TMPROOT, $_JCFDUMP,
