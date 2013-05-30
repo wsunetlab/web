@@ -27,7 +27,7 @@ $commandString = "/usr/lib/jvm/java-6-openjdk/bin/java -cp /var/www/web/util/tin
 	#print "$commandString\n";
 #}
 }
-sleep(20);
+sleep(10);
 
 my $GetProcessId = `ps -ef | grep "net.tinyos.tools.Listen" | awk '{print \$2}'  > processes.txt`;
 my $process_id;
