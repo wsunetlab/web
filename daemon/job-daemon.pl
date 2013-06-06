@@ -640,19 +640,34 @@ print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
 	while ( $classesRef = $classesStatement->fetchrow_hashref() ) {
 		open( DATA, ">$dirName/$classesRef->{'fileid'}.dat" );
 		my $tableName = $tableNameRoot . "_" . $classesRef->{'fileid'};
-		print "**************\n";
-		print SUMMARY "Dumping field info for message class #"
-		  . print "**************\n";
+	#	print "**************\n";
+		print SUMMARY "Dumping field info for message class #";
+	#	print "**************\n";
 		$classesRef->{'fileid'} . "\n";
-		print "**************\n";
+	#	print "**************\n";
 		print SUMMARY `$_DATAUPDATEROOT "describe $userDB.$tableName"`;
-		print "**************\n";
+	#	print "**************\n";
 		print DATA `$_DATAUPDATEROOT "select * from $userDB.$tableName"`;
-		print "**************\n";
+	#	print "**************\n";
 		close DATA;
 	}
 
 	close SUMMARY;
+
+	my @topFileArray;
+	
+	open (TOP_FILE, "/var/www/web/daemon/hellomote/Topology_Result.summary");	
+	while(<TOP_FILE>){
+	  chomp;
+	  push(@topFileArray,$_);
+	}	
+	close TOP_FILE;
+
+	open (TOP_DATA_FILE, ">$dirName/topresult.summary");
+	  print TOP_DATA_FILE "bestD:$topFileArray[0]\n";
+	  print TOP_DATA_FILE "bestP:$topFileArray[1]\n";
+	  print TOP_DATA_FILE "Lr:$topFileArray[2]\n";
+	close TOP_DATA_FILE;
 
 	# 19 Oct 2003 : GWA : zip up everything.
 
@@ -1110,7 +1125,7 @@ foreach my $currentJob (@jobArray) {
 		print "Current mote program : " . @currentMoteProg . "\n";
 		print "**************\n";
 
-		print "Test 1:" . "$currentMoteProg[$moteid]\n";
+		#print "Test 1:" . "$currentMoteProg[$moteid]\n";
 		if ( defined( $currentMoteProg[$moteid] ) ) {
 			$fileid = $currentMoteProg[$moteid];
 			print "**************\n";
@@ -1297,7 +1312,7 @@ print "starting at topology code\n";
 	
 	#	if ( $topologyPID == 0 ) {
 		
-	print "came in topology code at:1";
+	print "came in topology code at:1\n";
 			my $dbEdges;
 			my $dbNodes;
 
@@ -1331,6 +1346,7 @@ print "starting at topology code\n";
 				my @nodeSplit =
 				  split( ",", $node );    # split individual node data on ","
 				my $nodeId = substr( $nodeSplit[0], 1 );    # offset by 1 to ignore "("
+				print "nodes in loop:$nodeId\n";
 				push( @nodes, $nodeId );         # push nodeId onto nodes
 			}
 
@@ -1362,8 +1378,9 @@ print "starting at topology code\n";
 		#	`sudo chmod 666 /dev/bus/usb/*/*`;    # write permissions for usb
 
 			# for each node, run the algorithm (right nw run once : May 23
-		#	foreach my $nodeId (@nodes) {
-				my $nodeId = 1;
+			foreach my $nodeId (@nodes) {
+		#		my $nodeId = 1;
+				print "Node : $nodeId\n";
 				my $stepperSerial;
 				my $stepperQuery =
 				  "select stepper_serial from motes where moteid = "
@@ -1385,11 +1402,11 @@ print "starting at topology code\n";
 
 				my $Lu;
 
-#TODO: something wrong is happening at below line. Not getting Lu data as required.
+#TODO: something wrong is happening at below line. Not getting Lu data as required. - Got it fiexed. (May 29 2013)
 
-				foreach my $connectedNode ( $edges{$nodeId} ) {
+				foreach my $connectedNode ( @{$edges{$nodeId}} ) {
 					print "Edges{nodeid} : $edges{$nodeId} \n";
-					print "Edges node id size : @edges{$nodeId} \n";
+					print "Edges node id size :". scalar(@edges{$nodeId}) ."\n";
 					print "ConnectedNode: $connectedNode\n";
 					$Lu .= $connectedNode . ",";
 				}
@@ -1397,24 +1414,30 @@ print "starting at topology code\n";
 				print "Stepper Serial:" . $stepperSerial . "\n";
 				print "Lu: " . $Lu . "\n";
 
-				print `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3`;
+	#			print `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3`;
 		#	my $myTopOutput = system("/usr/bin/perl /var/www/web/daemon/topologyConfig.pl 1 283607 2,3");
 
-		#		sleep(30);
 			#sleep(30);
 #				print "Topology Output: $myTopOutput \n";
+print "topology Command: /usr/bin/perl /var/www/web/daemon/topologyConfig.pl $nodeId $stepperSerial $Lu \n";
 
-#print `./topologyConfig.pl $nodeId $stepperSerial $Lu`;
+my @algoResult;
 
+if($Lu ne ""){
+	@algoResult = `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl $nodeId $stepperSerial $Lu $jobID $topologyId`;
+}
+#sleep(30);
  #     my @algoResult = `./topologyConfig.pl 1 283607 2,3`; # apply algorithm
-#    my $bestD = $algoResult[0]; # TODO: could also store these values in database from the topologyConfig script
-#   my $bestP = $algoResult[1];
-#my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
-#   my @Lr = split(" ", $algoResult[2]);
+    my $bestD = $algoResult[0]; # TODO: could also store these values in database from the topologyConfig script
+   my $bestP = $algoResult[1];
+my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
+   my @Lr = split(" ", $algoResult[2]);
+
+#print "Best D:$bestD\n" . "Best P:$bestP\n" . "Lr list:@Lr\n";
 
 				# TODO: use values for error (put results into zip)
 			}
-#		}
+		}
 #	}
 
 	# set flag to '0'. 

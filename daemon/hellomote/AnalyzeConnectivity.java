@@ -51,6 +51,16 @@ public class AnalyzeConnectivity {
 		String tokenArray[] = null;
 		int INF_VALUE = 9999999;
 		List<String> moteIdList;
+		String jobID, topologyId;
+		if(args.length == 0){
+		  jobID = null;
+		  topologyId = null;
+		}else{
+				
+		  jobID = args[0];
+		  topologyId = args[1];
+		}
+
 	//	int noOfMotes = 3;
 	try{
 		Connection con = getJDBCConnection();
@@ -100,7 +110,7 @@ public class AnalyzeConnectivity {
 	moteCreateTableStat = con.createStatement();
 	String currentDate = getDateTime();
 
-	moteCreateTableStat.executeUpdate("create table auth.data_"+currentDate+"(id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), send_addr varchar(100), msg_counter varchar(100), rec_addr varchar(100), time_Stamp DATETIME)");
+	moteCreateTableStat.executeUpdate("create table auth.data_"+currentDate+"(id INT NOT NULL AUTO_INCREMENT, PRIMARY KEY(id), send_addr varchar(100), msg_counter varchar(100), rec_addr varchar(100), time_Stamp DATETIME, topology_id varchar(100), job_id varchar(100))");
 
 	int l=0;
 
@@ -148,7 +158,7 @@ public class AnalyzeConnectivity {
 //		System.out.println("Sender Node:"+sender_node);
 //		System.out.println("Receiver node:"+receiver_node);
 
-		moteCreateTableStat.executeUpdate("insert into auth.data_"+currentDate+"(send_addr,msg_counter,rec_addr,time_Stamp) values ("+Integer.toString(sender_node)+","+Integer.toString(msg_decimal)+","+Integer.toString(receiver_node)+","+ "NOW())");
+		moteCreateTableStat.executeUpdate("insert into auth.data_"+currentDate+"(send_addr,msg_counter,rec_addr,time_Stamp,topology_id,job_id) values ("+Integer.toString(sender_node)+","+Integer.toString(msg_decimal)+","+Integer.toString(receiver_node)+","+ "NOW()"+","+topologyId+","+jobID+")");
 
 
 		totalMsgFromSToR[receiver_node][sender_node]++;

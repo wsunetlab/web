@@ -10,6 +10,9 @@ my $ourDB = DBI->connect($_DSN)
   or die "Couldn't connect to database: $DBI::errstr\n";
 
 my $numMotes = $ARGV[0];
+my $topologyId = $ARGV[1];
+my $jobID = $ARGV[2];
+
 
 my $moteListRoot = "select moteid,ip_addr from auth.motes where active='1'";
 my $moteListStatement;
@@ -42,6 +45,6 @@ my $AnalyzeConnectivity;
 my $run_analyze;
 chdir('/var/www/web/daemon/') or die "$!";
 $AnalyzeConnectivity = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/mysql-connector-java-5.1.10-bin.jar hellomote.AnalyzeConnectivity";
-$run_analyze = `$AnalyzeConnectivity`;
+$run_analyze = `$AnalyzeConnectivity $jobID $topologyId`;
 print "$run_analyze\n";
 #sleep(40);
