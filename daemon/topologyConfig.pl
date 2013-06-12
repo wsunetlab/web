@@ -32,11 +32,6 @@
     exit(0);
   }
 
-#my $Lu;
-
-#print "File started Here (TopologyConfig.pl), Time of Start:";
-#print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
-#print "\n";
 
   if (defined($userNodeList)) {
     @Lu = split(',', $userNodeList);
@@ -80,25 +75,15 @@
   #while (1) { #original loop
   $i = 0;
   while($i <= 1){
-  #  print "$_ROTATE $d";
-  #  print "Applied Degree : $d\n";
   chdir("/var/www/web/daemon") or die "$1";
   my $out1 = system("$_ROTATE $d");
   # wait for rotation to finish	
   sleep(5);
 
-#  my $out = system("$_ROTATE");
-# print "Java output:$out1\n";
-#  print `$_ROTATE $d\n`;
-#  print "done rotating\n";
-
   @Lr = ();
   my $currentError = 0;
   
 # TODO: send hello message and collect acks;
-  #  while (0) {
-# Run Hello world ack code 
-#my $ackList = `$_HELLO $p`;
 
   chdir("/var/www/web/daemon/hellomote") or die "$1";
 #TODO: make changes here for acknowledgment list
@@ -106,9 +91,6 @@
 
   sleep(20);
 #print "Ack List Output: $ackList\n";
-#my $ackList = `$_HELLO $p`;  
-#  sleep(80);
-#print $ackList;
   
 
   my @acks = split(',', $ackList);
@@ -141,11 +123,7 @@
   }
 
 
- # }
-
   $d += $_DTHETA;
- # print "New Degree d: $d \n";
- # sleep(0);
 
   $i++;
   } #while(1) loop ends here
@@ -160,8 +138,3 @@
   print TOPDATA "$bestP\n";
   print TOPDATA "@Lr\n";
   close TOPDATA;
-
-#print "End time:";
-#print DateTime->now()->strftime("%a, %d %b %Y %H:%M:%S %z");
-#print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
-#print "\n";
