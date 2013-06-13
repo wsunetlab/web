@@ -1308,10 +1308,16 @@ print "starting at topology code\n";
 	{ # if topologyId not null, then job uses a topology, and so parse and run the algorithm
 #check if flag is not 0, if flag is non-zero that means topology code has not run before. 
 	if($topology_run_flag != "0"){
-	#	my $topologyPID = fork();
 	
-	#	if ( $topologyPID == 0 ) {
-		
+	#delete topology summary before writing into it.
+        my $fileToDelete = "/var/www/web/daemon/hellomote/Topology_Result.summary";
+
+	if(unlink($fileToDelete) == 0){
+	  print "file deleted\n";
+	}else{
+	  print "problem while deleting file\n";
+	}
+	
 	print "came in topology code at:1\n";
 			my $dbEdges;
 			my $dbNodes;

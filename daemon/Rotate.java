@@ -8,6 +8,10 @@ public class Rotate {
     
      
     public static void main(String[] args) throws PhidgetException {
+	if(args.length == 0){
+	  System.out.println("Usage: java Rotate stepperserial degree");
+	  System.exit(0);
+	}
         int stepper_serial = Integer.parseInt(args[0]);
         int d = Integer.parseInt(args[1]);
        	System.out.println("*********** JAVA Rotate Program **************"); 
@@ -34,6 +38,7 @@ public class Rotate {
 	long targetPos = (long) ((d / 0.9) * 16);
         stepper.setTargetPosition(0, targetPos);
 	stepper.close();
+	stepper = null;
 //	return 23;
     }
 }

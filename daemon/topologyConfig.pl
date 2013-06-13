@@ -6,6 +6,8 @@
 #use strict;
   use DateTime;
   use POSIX qw(strftime);
+  use DBI;
+  use strict;
 
   my $_PMAX = 5; # TODO: Right now set to max - change if needed; min val:1 and max val:31
   my $_PMIN = 1;
@@ -23,6 +25,14 @@
   my $topologyId = $ARGV[4];
 #Arguments End
 
+
+  my $_DSN = "DBI:mysql:database=auth:host=netlab.encs.vancouver.wsu.edu:user=root:password=linhtinh";
+
+  my $ourDB = DBI->connect($_DSN)
+    or die "Couldn't connect to database: $DBI::errstr\n";
+
+  my $packetAckQuery = "select rec_addr from auth.linkQuality where send_addr = $node and PRR > 0";
+  my $packetAckStatement;
 
   my @Lu;
 
@@ -56,10 +66,10 @@
   chdir("/var/www/web/daemon") or die "$1";
 
 
-  my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/phidget21.jar Rotate $stepperSerial";
+ # my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/phidget21.jar Rotate $stepperSerial";
 
 # May 23 2013: phidget21.jar has been added to classpath, so no need to pass explicitly. 
-#my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java Rotate $stepperSerial";
+  my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java Rotate $stepperSerial";
 #my $_HELLO = "perl helloProgram.pl $node";
 
 # TODO: You are suppose to send the power to get acknowledges by power. Modify the below _HELLO string to get the changes.
@@ -73,7 +83,7 @@
   my $_HELLO = "/bin/bash envsetup.sh $jobID $topologyId";  
 
   #while (1) { #original loop
-  $i = 0;
+  my $i = 0;
   while($i <= 1){
   chdir("/var/www/web/daemon") or die "$1";
   my $out1 = system("$_ROTATE $d");
@@ -88,12 +98,18 @@
   chdir("/var/www/web/daemon/hellomote") or die "$1";
 #TODO: make changes here for acknowledgment list
   my $ackList = `$_HELLO $p`;
-
   sleep(20);
 #print "Ack List Output: $ackList\n";
-  
+  my @acks;
+  $packetAckStatement = $ourDB->prepare($packetAckQuery)
+   or die "Couldn't prepare query '$packetAckQuery': $DBI::errstr\n";
+  $packetAckStatement->execute();
+  while( my $packetAckRef = $packetAckStatement->fetchrow_hashref()){
+    push(@acks,$packetAckRef->{'rec_addr'});
+  }
 
-  my @acks = split(',', $ackList);
+
+#  my @acks = split(',', $ackList);
 
   foreach my $ack (@acks) { # for each acknowledgement
     push(@Lr, $ack); # add sender to Lr
@@ -133,8 +149,8 @@
 #print "Best Tranmission Power P: $bestP\n";
 #print "New Node List: @Lr\n";
 
-  open (TOPDATA, ">/var/www/web/daemon/hellomote/Topology_Result.summary");
+  open (TOPDATA, ">>/var/www/web/daemon/hellomote/Topology_Result.summary");
   print TOPDATA "$bestD\n";
   print TOPDATA "$bestP\n";
-  print TOPDATA "@Lr\n";
+  print TOPDATA "$node".":"."@Lr\n";
   close TOPDATA;
