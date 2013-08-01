@@ -20,9 +20,9 @@ public class Rotate {
         StepperPhidget stepper = new StepperPhidget();
 //       System.out.println("Object created");
 	 stepper.open(stepper_serial);
-//	System.out.println("Opened ");
+	System.out.println("Opened ");
         stepper.waitForAttachment();
-//	System.out.println("Attached");
+	System.out.println("Attached");
         stepper.setVelocityLimit(0, 899.0); // TODO: calibrate for lab setting
         stepper.setAcceleration(0, 64808.0);
         stepper.setCurrentLimit(0, 0.51);
@@ -38,7 +38,7 @@ public class Rotate {
 	long targetPos = (long) ((d / 0.9) * 16);
         stepper.setTargetPosition(0, targetPos);
 	stepper.close();
-	stepper = null;
+//	stepper = null;
 //	return 23;
     }
 }
