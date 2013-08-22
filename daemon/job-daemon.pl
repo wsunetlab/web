@@ -333,13 +333,17 @@ print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
 	# 09 Mar 2004 : GWA : Seems to make sense to do the kill and the start
 	#               seperately.
 	my $sfKillCnt;
-	while ( my $moteBasicRef = $moteBasicStatement->fetchrow_hashref() ) {
 
-		# zone: only kill SFs for this job's motes
-		if ( defined( $currentMoteProg[ $moteBasicRef->{'moteid'} ] ) ) {
+#Aug 7 2013: Jenis : Here the serial forwarder is getting killed for current job running. Kill SF for all ids currently running on instead of only active motes. 
+
+  while ( my $moteBasicRef = $moteBasicStatement->fetchrow_hashref() ) {
+
+	# zone: only kill SFs for this job's motes
+	#Update: Aug 7 2013: Jenis: Commenting below line so that SF could be killed for all jobs. Hack is used. Please revert back if some problem is there. 
+#	if ( defined( $currentMoteProg[ $moteBasicRef->{'moteid'} ] ) ) {
 			if ( $moteBasicRef->{'sf_pid'} != 0 ) {
-				print "Killing process by sf_pid\n";
-				$sfKillCnt = kill 15, $moteBasicRef->{'sf_pid'};
+			print "Killing process by sf_pid\n";
+			$sfKillCnt = kill 15, $moteBasicRef->{'sf_pid'};
 			}
 
 			if ( $sfKillCnt != 0 ) {
@@ -358,7 +362,7 @@ print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
 			  or die
 			  "Couldn't prepare query '$moteUpdateQuery': $DBI::errstr\n";
 			$moteUpdateStatement->execute();
-		}
+#		}
 	}
 
 	# 02 Sep 2003 : GWA : If we weren't able to signal the process, perhaps it
@@ -430,49 +434,47 @@ if ( $numberRunning == 0 && $_DAEMONSUPPORT != 0 ) {
 				$killCnt = kill 15, $daemonInfoRef->{'duringrunpid'};
 			}
 
-	  #
-	  # 09 Mar 2004 : GWA : Hacking this up to set up seperate serial forwarders
-	  #               for each mote.
 
-			my $moteBasicQuery =
-			    "select ip_addr, comm_port, sf_pid from "
-			  . $_MOTEINFOTABLENAME
-			  . " where active=1";
-			my $moteBasicStatement;
-			$moteBasicStatement = $ourDB->prepare($moteBasicQuery)
-			  or die "Couldn't prepare query '$moteBasicQuery': $DBI::errstr\n";
-			$moteBasicStatement->execute();
+# 09 Mar 2004 : GWA : Hacking this up to set up seperate serial forwarders
+#               for each mote.
+# kills SF for all active motes. 
 
-		  # 09 Mar 2004 : GWA : Seems to make sense to do the kill and the start
-		  #               seperately.
-			my $sfKillCnt;
-			while ( my $moteBasicRef = $moteBasicStatement->fetchrow_hashref() )
-			{
-				if ( $moteBasicRef->{'sf_pid'} != 0 ) {
-					$sfKillCnt = kill 15, $moteBasicRef->{'sf_pid'};
-					print "Killing sf_pid jobs\n";
-				}
-				if ( $sfKillCnt != 0 ) {
-					push( @jobPIDs, $moteBasicRef->{'sf_pid'} );
-				}
-			}
-			$needClear = 1;
-			if ( $daemonInfoRef->{'postprocess'} ne "" ) {
-				my $postProcessCmd =
-				    $daemonInfoRef->{'postprocess'} . " "
-				  . $daemonInfoRef->{'cacheddb'};
-				print "************\n";
-				print "Post process cmd:$postProcessCmd";
-				print "**************\n";
-				my $postProcessPID = fork();
-				if ( $postProcessPID == 0 ) {
-					exec($postProcessCmd);
-				}
-			}
+  my $moteBasicQuery ="select ip_addr, comm_port, sf_pid from "
+		  . $_MOTEINFOTABLENAME
+		  . " where active=1";
+  my $moteBasicStatement;
+  $moteBasicStatement = $ourDB->prepare($moteBasicQuery)
+	  or die "Couldn't prepare query '$moteBasicQuery': $DBI::errstr\n";
+  $moteBasicStatement->execute();
 
-			my $updateQuery =
-			    "update "
-			  . $_JOBSTABLENAME
+# 09 Mar 2004 : GWA : Seems to make sense to do the kill and the start
+#               seperately.
+	my $sfKillCnt;
+	while ( my $moteBasicRef = $moteBasicStatement->fetchrow_hashref() )
+	{
+		if ( $moteBasicRef->{'sf_pid'} != 0 ) {
+		$sfKillCnt = kill 15, $moteBasicRef->{'sf_pid'};
+		print "Killing sf_pid jobs\n";
+        	}
+		if ( $sfKillCnt != 0 ) {
+		push( @jobPIDs, $moteBasicRef->{'sf_pid'} );
+		}
+	}
+
+	$needClear = 1;
+	if ( $daemonInfoRef->{'postprocess'} ne "" ) {
+	my $postProcessCmd =$daemonInfoRef->{'postprocess'} . " "			  . $daemonInfoRef->{'cacheddb'};
+
+	print "************\n";
+	print "Post process cmd:$postProcessCmd";
+	print "**************\n";
+
+	my $postProcessPID = fork();
+	if ( $postProcessPID == 0 ) {
+  	  exec($postProcessCmd);
+	}
+	}
+	my $updateQuery ="update ". $_JOBSTABLENAME
 			  . " set cronactive=0"
 			  . ", duringrunpid=0"
 			  . ", cacheddb=\"\""
@@ -664,9 +666,9 @@ print strftime("%a, %d %b %Y %H:%M:%S %z", localtime(time())) . "\n";
 	close TOP_FILE;
 
 	open (TOP_DATA_FILE, ">$dirName/topresult.summary");
-	  print TOP_DATA_FILE "bestD:$topFileArray[0]\n";
-	  print TOP_DATA_FILE "bestP:$topFileArray[1]\n";
-	  print TOP_DATA_FILE "Lr:$topFileArray[2]\n";
+#	  print TOP_DATA_FILE "bestD:$topFileArray[0]\n";
+	  print TOP_DATA_FILE "bestP:$topFileArray[0]\n";
+	  print TOP_DATA_FILE "Lr:$topFileArray[1]\n";
 	close TOP_DATA_FILE;
 
 	# 19 Oct 2003 : GWA : zip up everything.
@@ -1107,19 +1109,21 @@ foreach my $currentJob (@jobArray) {
 ### All of the above should moved together down
 
 # zone: now we need to step through currentMoteProg, look up the files and get them ready for each mote
-
+# Aug 18 2013: Jenis : trying to put all this in sub module (function)
+#sub createMoteIds{
 	my @pathCache;
 
 	# changed loop to include currentMoteprog +1 by Jenis
 	#changed again to 0 : Nov 29 2012 , testing
 	# didn't work above, so added @currentmoteprog to the loop, testing
 	#  for (my $moteid = 1; $moteid <= $#currentMoteProg; $moteid++) {
-	print "Current mote prog size: @currentMoteProg\n";
+	print "Current mote prog size:". scalar @currentMoteProg ."\n";
 	for ( my $moteid = 1 ; $moteid <= @currentMoteProg ; $moteid++ ) {
 		my $fileid;
 		print "Current mote prog:$#currentMoteProg\n";
 		print "moteId:$moteid\n";
 
+	print "Jenis called here\n";
 		print "**************\n";
 		print "@currentMoteProg\n";
 		print "Current mote program : " . @currentMoteProg . "\n";
@@ -1162,6 +1166,7 @@ foreach my $currentJob (@jobArray) {
 
 		#    my $moteSREC = $moteRoot . ".srec";
 		my $moteSREC = $moteRoot . ".ihex";
+		# Just adds "" to the variable. e.g. "3.ihex" or "3.exe"
 		$moteEXE  = "\"" . $moteEXE . "\"";
 		$moteSREC = "\"" . $moteSREC . "\"";
 
@@ -1169,6 +1174,7 @@ foreach my $currentJob (@jobArray) {
 		#               that case, we use the avr-objcopy to move the file.
 
  # zone: we'll probably need some sort of SETFREQUENCY program to run here FIXME
+# sets Mote id for exe file. 
 
 		my $setMoteID =
 		    "$_SETMOTEID --exe \""
@@ -1182,6 +1188,7 @@ foreach my $currentJob (@jobArray) {
 		my $avrRoot = "$_AVROBJCOPY --output-target=ihex";
 
 		#print "$setMoteID\n";
+
 		my $output = `$setMoteID`;    # 2> /dev/null`;
 		print "**************\n";
 		print "Output:" . "$output\n";
@@ -1193,6 +1200,10 @@ foreach my $currentJob (@jobArray) {
 		else {
 			$avrRoot .= " $moteEXE $moteSREC";
 		}
+
+#Aug 1 2013: Jenis
+#converts exe to ihex file using msp430-objcopy.
+#For example : /usr/bin/msp430-objcopy --output-target=ihex "1.exe" "1.ihex" 
 
 		# 31 Aug 2003 : GWA : Actually run the command and log output.
 		print "Avr root:$avrRoot\n";
@@ -1430,10 +1441,15 @@ print "topology Command: /usr/bin/perl /var/www/web/daemon/topologyConfig.pl $no
 my @algoResult;
 
 if($Lu ne ""){
-	@algoResult = `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl $nodeId $stepperSerial $Lu $jobID $topologyId`;
+#Aug 7 2013: Cannot get node and transmission in array like this, so read the file and store the data in global variable. 
+#	@algoResult = `/usr/bin/perl /var/www/web/daemon/topologyConfig.pl $nodeId $stepperSerial $Lu $jobID $topologyId`;
+`/usr/bin/perl /var/www/web/daemon/topologyConfig.pl $nodeId $stepperSerial $Lu $jobID $topologyId`;
 }
+
 #sleep(30);
  #     my @algoResult = `./topologyConfig.pl 1 283607 2,3`; # apply algorithm
+
+=cut
     my $bestD = $algoResult[0]; # TODO: could also store these values in database from the topologyConfig script
    my $bestP = $algoResult[1];
 my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
@@ -1442,6 +1458,8 @@ my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
 #print "Best D:$bestD\n" . "Best P:$bestP\n" . "Lr list:@Lr\n";
 
 				# TODO: use values for error (put results into zip)
+=cut
+
 			}
 		}
 #	}
@@ -1462,6 +1480,8 @@ my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
 	#}
 
   ALGORITHMDONE:
+
+# Aug 12 2013: Jenis: get all the new moteids from topology here. 
 
 	my @threadArray;
 	print "**************\n";
@@ -1486,6 +1506,7 @@ my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
 		#  }
 		print "**************\n";
 		print "Reprogramming mote " . $moteInfoRef->{'moteid'} . "\n";
+# Aug 7 2013: Here progrm to be executed is passed in doProgram thread. So, pass the new ids from topology to here. 
 		my $t = new Thread(
 			\&doProgram,
 			(
@@ -1526,44 +1547,40 @@ my $nodeResultList = $algoResult[2];  # To zip the node ids in data folder.
 
 	# SerialForwarder should moved down after reprogramming the motes
 	# my $sfPID;
-	while ( my $moteBasicRef = $moteBasicStatement->fetchrow_hashref() ) {
-print "cmg in first loop\n";
-		# zone: this should be done only for the current job's motes
-		if ( defined( $currentMoteProg[ $moteBasicRef->{'moteid'} ] ) ) {
-print "cmg in second loop\n";
-	#   my $sfCommand = "$_EXTERNALSF -comm serial\@$moteBasicRef->{'ip_addr'}:"
-	#                  . "$_MOTECOMMPORT -port $moteBasicRef->{'comm_port'}" .
-	#                 " -no-gui -quiet";
+  while ( my $moteBasicRef = $moteBasicStatement->fetchrow_hashref() ) {
+#  print "cmg in first loop\n";
+# zone: this should be done only for the current job's motes
+     if ( defined( $currentMoteProg[ $moteBasicRef->{'moteid'} ] ) ) {
+#  print "cmg in second loop\n";
 
-			my $sfCommand =
-			    "$_EXTERNALSF -comm serial\@$moteBasicRef->{'ip_addr'}:"
-			  . "$_MOTECOMMPORT -port $moteBasicRef->{'comm_port'}"
-			  . " -no-gui -quiet";
-			print "**************\n";
-			print $sfCommand . "\n";
-			print "**************\n";
+        my $sfCommand ="$_EXTERNALSF -comm serial\@$moteBasicRef->{'ip_addr'}:". "$_MOTECOMMPORT -port $moteBasicRef->{'comm_port'}". " -no-gui -quiet";
 
-			$sfPID = fork();
-			print "sfPID:$sfPID\n";
-			#check somewhere here for serial forward repeaters - Jenis
-			if ( $sfPID == 0 ) {
-				print before;
-				print "**************\n";
-				print "before executing sfCommand\n";
-				print "**************\n";
+        print "**************\n";
+        print $sfCommand . "\n";
+        print "**************\n";
+
+	$sfPID = fork();
+	print "sfPID:$sfPID\n";
+
+	if ( $sfPID == 0 ) {
+		print before;
+		print "**************\n";
+		print "before executing sfCommand\n";
+		print "**************\n";
 # Serial forwarder getting executed here
-				exec("exec $sfCommand");
-				print after;
-			}
-			my $updateMotesQuery =
-			    "update motes set sf_pid=" 
-			  . $sfPID
+		exec("exec $sfCommand");
+		print after;
+	}
+
+	my $updateMotesQuery ="update motes set sf_pid=". $sfPID
 			  . " where ip_addr=\""
 			  . $moteBasicRef->{'ip_addr'} . "\"";
-			my $updateMoteStatement;
-			$updateMoteStatement = $ourDB->prepare($updateMotesQuery);
-			$updateMoteStatement->execute();
-		}
+
+	my $updateMoteStatement;
+	$updateMoteStatement = $ourDB->prepare($updateMotesQuery);
+	$updateMoteStatement->execute();
+
+    }
 	}
 
 ### dblogger should be right after the the serial forwarder
@@ -1647,16 +1664,16 @@ print "cmg in second loop\n";
 	my $dbLoggerPID = fork();
 	if ( $dbLoggerPID == 0 ) {
 
-	   # 02 Sep 2003 : GWA : Little hack here suggested by david holland to make
-	   #               sure that we get the right PID.
+# 02 Sep 2003 : GWA : Little hack here suggested by david holland to make
+#               sure that we get the right PID.
 
-		exec("exec $dbLoggerCommand");
+	exec("exec $dbLoggerCommand");
 	}
 
 ### end of dblogger things
 
-	# 02 Sep 2003 : GWA : We've set up everything that we can.  Now update the
-	#               database.
+# 02 Sep 2003 : GWA : We've set up everything that we can.  Now update the
+#               database.
 
 	if ( !$isDaemonJob ) {
 		my $updateQuery =

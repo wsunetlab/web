@@ -69,7 +69,7 @@
  # my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/var/www/web/daemon/phidget21.jar Rotate $stepperSerial";
 
 # May 23 2013: phidget21.jar has been added to classpath, so no need to pass explicitly. 
-  my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java Rotate $stepperSerial";
+  my $_ROTATE = "/usr/lib/jvm/java-6-openjdk/bin/java -cp .:/usr/lib/jvm/java-6-openjdk/lib/phidget21.jar Rotate $stepperSerial";
 #my $_HELLO = "perl helloProgram.pl $node";
 
 # TODO: You are suppose to send the power to get acknowledges by power. Modify the below _HELLO string to get the changes.
@@ -148,9 +148,21 @@
 #print "Best Degree D :$bestD\n";
 #print "Best Tranmission Power P: $bestP\n";
 #print "New Node List: @Lr\n";
-
+#Aug 7 2013:trying to store everything in database instead of filee
+=cut
   open (TOPDATA, ">>/var/www/web/daemon/hellomote/Topology_Result.summary");
-  print TOPDATA "$bestD\n";
+#  print TOPDATA "$bestD\n";
   print TOPDATA "$bestP\n";
   print TOPDATA "$node".":"."@Lr\n";
   close TOPDATA;
+=cut
+
+  my $newTopDataQuery = "insert into auth.topology_jobdata values(".$jobID.",".$topologyId.",".$node.",".$bestP.",".@Lr.")";
+
+  my $newTopDataStatement;
+
+  $newTopDataStatement = $ourDB->prepare($newTopDataQuery)
+   or die "Couldn't prepare query '$newTopDataQuery': $DBI::errstr\n";
+  $newTopDataStatement->execute();
+
+#  $ourDB->disconnect;
