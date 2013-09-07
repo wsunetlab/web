@@ -9,8 +9,8 @@
   use DBI;
   use strict;
 
-  my $_PMAX = 5; # TODO: Right now set to max - change if needed; min val:1 and max val:31
-  my $_PMIN = 1;
+  my $_PMAX = 31; # TODO: Right now set to max - change if needed; min val:1 and max val:31
+  my $_PMIN = 29;
   my $_PDELTA = 1;
 
   my $_DMAX = 90;
@@ -57,9 +57,9 @@
   my $p = $_PMAX;
   my @Lr;
   my $bestError = $#Lu;
-  my $d = 0;
+  my $d = 10;
   #just for testing
-  $d =20;
+#  $d =20;
   my $bestD = $d;
   my $bestP = $p;
 
@@ -84,7 +84,7 @@
 
   #while (1) { #original loop
   my $i = 0;
-  while($i <= 1){
+  while($i < 3){
   chdir("/var/www/web/daemon") or die "$1";
   my $out1 = system("$_ROTATE $d");
   # wait for rotation to finish	
@@ -108,6 +108,9 @@
     push(@acks,$packetAckRef->{'rec_addr'});
   }
 
+#print "Acks:";
+#print join(", ", @acks);
+#print "\n";
 
 #  my @acks = split(',', $ackList);
 
@@ -119,6 +122,9 @@
       }
     }
 
+#print "Lr :";
+#print join(", ", @Lr);
+#print "\n";
     if ($currentError < $bestError ||
         ($currentError == $bestError && $p < $bestP)) {
       $bestError = $currentError;
@@ -157,12 +163,22 @@
   close TOPDATA;
 =cut
 
-  my $newTopDataQuery = "insert into auth.topology_jobdata values(".$jobID.",".$topologyId.",".$node.",".$bestP.",".@Lr.")";
+#print "Lr Again:";
+#print join(", ", @Lr);
+#print "\n";
+#convert perl array to perl string, check blog for reason
+my $LrString = join " ", @Lr;
 
+if($LrString eq ""){
+	$LrString = 0;
+}
+  my $newTopDataQuery = "insert into auth.topology_jobdata (job_id,topology_id,lu_id,tx_power,new_nodes) values (".$jobID.",".$topologyId.",".$node.",".$bestP.",".$LrString.")";
+
+print "Query: $newTopDataQuery\n";
   my $newTopDataStatement;
 
   $newTopDataStatement = $ourDB->prepare($newTopDataQuery)
-   or die "Couldn't prepare query '$newTopDataQuery': $DBI::errstr\n";
+   or die "Couldn't prepare query $newTopDataQuery: $DBI::errstr\n";
   $newTopDataStatement->execute();
 
 #  $ourDB->disconnect;
